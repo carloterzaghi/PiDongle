@@ -14,7 +14,8 @@ scan_networks() {
     # --rescan yes faz nmcli aguardar o scan terminar antes de listar
     nmcli -t -f SSID,SIGNAL,SECURITY,ACTIVE device wifi list ifname "$IFACE" --rescan yes 2>/dev/null |
         awk -F: '$1 != "" {print}' |
-        sort -t: -k2 -nr -u
+        sort -t: -k2 -nr |
+        awk -F: '!seen[$1]++'
 }
 
 current_network() {
@@ -29,9 +30,37 @@ connect_network() {
     [ -z "$SSID" ] && { echo "ERROR: SSID is required"; exit 1; }
 
     if [ -n "$PASS" ]; then
-        nmcli device wifi connect "$SSID" password "$PASS" ifname "$IFACE"
+        OUTPUT=$(nmcli device wifi connect "$SSID" password "$PASS" ifname "$IFACE" 2>&1)
+        RET=$?
+        if [ $RET -ne 0 ] && echo "$OUTPUT" | grep -q "key-mgmt"; then
+            # Tenta forçar a criação do perfil com WPA-PSK
+            nmcli connection delete "$SSID" >/dev/null 2>&1
+            nmcli connection add type wifi ifname "$IFACE" con-name "$SSID" ssid "$SSID" wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$PASS" >/dev/null 2>&1
+            OUTPUT_UP=$(nmcli connection up "$SSID" 2>&1)
+            if [ $? -eq 0 ]; then
+                echo "$OUTPUT_UP"
+            else
+                echo "Erro: $OUTPUT_UP (Fallback failed)"
+                exit 1
+            fi
+        elif [ $RET -ne 0 ]; then
+            echo "$OUTPUT"
+            exit $RET
+        else
+            echo "$OUTPUT"
+        fi
     else
-        nmcli device wifi connect "$SSID" ifname "$IFACE"
+        OUTPUT=$(nmcli device wifi connect "$SSID" ifname "$IFACE" 2>&1)
+        RET=$?
+        if [ $RET -ne 0 ] && echo "$OUTPUT" | grep -q "key-mgmt"; then
+            echo "Erro: Esta rede precisa de senha. Deixá-la em branco só funciona se a rede já estiver salva."
+            exit 1
+        elif [ $RET -ne 0 ]; then
+            echo "$OUTPUT"
+            exit $RET
+        else
+            echo "$OUTPUT"
+        fi
     fi
 }
 
