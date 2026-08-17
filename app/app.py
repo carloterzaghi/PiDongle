@@ -83,7 +83,11 @@ def run_action(action_id):
     if action_id not in ACTIONS:
         abort(404)
     script = ACTIONS[action_id]["script"]
-    result = _run_script(script)
+    
+    # System updates take longer on a Raspberry Pi Zero, so we increase the timeout to 10 minutes
+    timeout = 600 if action_id == "update" else 30
+    result = _run_script(script, timeout=timeout)
+    
     return jsonify(result)
 
 
@@ -150,5 +154,17 @@ def wifi_connect():
     return jsonify(result)
 
 
+@app.route("/api/ping", methods=["POST"])
+def ping():
+    """Pings the given target."""
+    data = request.get_json(silent=True) or {}
+    target = (data.get("target") or "").strip()
+    if not target:
+        return jsonify({"ok": False, "output": "Target is required"}), 400
+    result = _run_script("ping.sh", [target])
+    return jsonify(result)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
