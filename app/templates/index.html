@@ -249,10 +249,101 @@
       pointer-events: none;
     }
 
-    /* ---- Wi-Fi networks ---- */
+    /* ---- Wi-Fi networks panel ---- */
+    #floating-wifi-btn {
+      position: fixed;
+      right: 1.5rem;
+      bottom: 1.5rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 20px rgba(124, 106, 247, .4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    #floating-wifi-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 24px rgba(124, 106, 247, .6);
+    }
+
+    #floating-wifi-btn:active {
+      transform: scale(.95);
+    }
+
+    #floating-wifi-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    #wifi-panel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .4);
+      backdrop-filter: blur(2px);
+      z-index: 94;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+
+    #wifi-panel-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     #wifi-section {
-      max-width: 720px;
-      margin: 0 auto 2.5rem;
+      position: fixed;
+      top: 0;
+      right: -360px;
+      width: 100%;
+      max-width: 360px;
+      height: 100vh;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      z-index: 95;
+      overflow-y: auto;
+      transition: right .3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+    }
+
+    #wifi-section.open {
+      right: 0;
+    }
+
+    #wifi-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    #wifi-section-header h2 {
+      margin-bottom: 0;
+      text-align: left;
+    }
+
+    #wifi-section-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 2rem;
+      line-height: 1;
+      padding: 0 .5rem;
+      transition: color .2s;
+    }
+
+    #wifi-section-close:hover {
+      color: var(--text);
     }
 
     .wifi-current {
@@ -323,16 +414,47 @@
       border-color: var(--accent);
     }
 
-    #wifi-password-field {
+    #wifi-password-wrap {
       display: none;
-      width: 100%;
+      position: relative;
       margin-top: 1rem;
-      padding: .6rem .8rem;
+    }
+
+    #wifi-password-field {
+      width: 100%;
+      padding: .6rem 2.4rem .6rem .8rem;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg);
       color: var(--text);
       font-size: .9rem;
+    }
+
+    #wifi-password-toggle {
+      position: absolute;
+      right: .6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      padding: 0;
+    }
+
+    #wifi-password-toggle:hover {
+      color: var(--text);
+    }
+
+    .ping-input {
+      padding: .4rem .6rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: .85rem;
     }
 
     /* ---- Output log ---- */
@@ -484,10 +606,12 @@
     {% endfor %}
   </div>
 
-  <!-- Share Wi-Fi -->
-  <div id="share-section">
-    <h2>Internet Sharing</h2>
-    <div class="share-card" id="share-card">
+  <!-- Internet Section -->
+  <div id="internet-section" style="max-width: 720px; margin: 0 auto 2.5rem;">
+    <h2>Internet</h2>
+    
+    <!-- Share Wi-Fi -->
+    <div class="share-card" id="share-card" style="margin-bottom: 1rem;">
       <div class="share-info">
         <span class="share-icon">📡</span>
         <div>
@@ -500,11 +624,39 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
+
+    <!-- Ping Tool -->
+    <div class="share-card" id="ping-card">
+      <div class="share-info" style="width: 100%;">
+        <span class="share-icon">🏓</span>
+        <div style="flex-grow: 1;">
+          <div class="share-label">Ping Test</div>
+          <div class="share-status" style="margin-bottom:0.6rem;">Test connectivity to a domain or IP</div>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <select id="ping-target-select" class="ping-input" style="flex-grow:1; max-width:200px;">
+              <option value="google.com">google.com</option>
+              <option value="1.1.1.1">1.1.1.1 (Cloudflare)</option>
+              <option value="8.8.8.8">8.8.8.8 (Google DNS)</option>
+              <option value="custom">Custom...</option>
+            </select>
+            <input type="text" id="ping-target-custom" class="ping-input" placeholder="e.g. 192.168.1.1" style="display:none; flex-grow:1; max-width:200px;">
+            <button id="ping-btn" class="wifi-refresh" style="margin:0; padding: 0.4rem 1rem;">Ping</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Wi-Fi Networks -->
+  <!-- Floating Wi-Fi Button & Panel -->
+  <button id="floating-wifi-btn" aria-label="Wi-Fi Networks">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+  </button>
+  <div id="wifi-panel-overlay"></div>
   <div id="wifi-section">
-    <h2>Wi-Fi Network</h2>
+    <div id="wifi-section-header">
+      <h2>Wi-Fi Network</h2>
+      <button id="wifi-section-close" aria-label="Close">&times;</button>
+    </div>
     <div class="wifi-current">Connected to: <span class="ssid" id="wifi-current">—</span></div>
     <button class="wifi-refresh" id="wifi-refresh">🔄 Scan networks</button>
     <div id="wifi-list"><span class="entry-info" style="color:var(--muted)">Scanning...</span></div>
@@ -533,7 +685,20 @@
     <div id="wifi-modal">
       <h3 id="wifi-modal-title">Connect</h3>
       <p id="wifi-modal-msg">Enter the network password:</p>
-      <input type="password" id="wifi-password-field" placeholder="Password (leave blank if open)">
+      <div id="wifi-password-wrap">
+        <input type="password" id="wifi-password-field" placeholder="Password (leave blank if open)">
+        <button id="wifi-password-toggle" type="button" tabindex="-1" aria-label="Show password">
+          <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
       <div class="modal-btns" style="margin-top:1.5rem">
         <button class="btn btn-cancel" id="wifi-btn-cancel">Cancel</button>
         <button class="btn btn-confirm" id="wifi-btn-confirm">Connect</button>
@@ -609,7 +774,11 @@
         const data = await res.json();
         appendLog(data.output, data.ok ? 'ok' : 'err');
       } catch (e) {
-        appendLog('Error communicating with the Pi.', 'err');
+        if (id === 'update') {
+          appendLog('A atualização demora bastante e o navegador parou de aguardar a resposta. Mas não se preocupe, o Pi continua atualizando em segundo plano!', 'ok');
+        } else {
+          appendLog('Error communicating with the Pi.', 'err');
+        }
       } finally {
         if (btn) btn.classList.remove('loading');
       }
@@ -673,8 +842,19 @@
     const wifiModalBg = document.getElementById('wifi-modal-bg');
     const wifiModalMsg = document.getElementById('wifi-modal-msg');
     const wifiPasswordField = document.getElementById('wifi-password-field');
+    const wifiPasswordWrap = document.getElementById('wifi-password-wrap');
+    const wifiPasswordToggle = document.getElementById('wifi-password-toggle');
+    const eyeIcon = document.getElementById('eye-icon');
+    const eyeOffIcon = document.getElementById('eye-off-icon');
     const wifiBtnConfirm = document.getElementById('wifi-btn-confirm');
     const wifiBtnCancel = document.getElementById('wifi-btn-cancel');
+
+    wifiPasswordToggle.addEventListener('click', () => {
+      const isPassword = wifiPasswordField.type === 'password';
+      wifiPasswordField.type = isPassword ? 'text' : 'password';
+      eyeIcon.style.display = isPassword ? 'none' : '';
+      eyeOffIcon.style.display = isPassword ? '' : 'none';
+    });
 
     let pendingSsid = null;
 
@@ -689,6 +869,28 @@
       } catch (e) {
         wifiCurrent.textContent = '—';
       }
+    }
+
+    function getSignalInfo(signal) {
+      let bars = 1;
+      let label = "Weak";
+      if (signal >= 75) { bars = 4; label = "Excellent"; }
+      else if (signal >= 50) { bars = 3; label = "Good"; }
+      else if (signal >= 25) { bars = 2; label = "Fair"; }
+
+      const f1 = bars >= 1 ? 'currentColor' : 'var(--border)';
+      const f2 = bars >= 2 ? 'currentColor' : 'var(--border)';
+      const f3 = bars >= 3 ? 'currentColor' : 'var(--border)';
+      const f4 = bars >= 4 ? 'currentColor' : 'var(--border)';
+
+      const svg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="vertical-align:middle; margin-right:4px;">
+        <path d="M4 19L4 16" stroke="${f1}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M9 19L9 12" stroke="${f2}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M14 19L14 8" stroke="${f3}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M19 19L19 4" stroke="${f4}" stroke-width="3" stroke-linecap="round"/>
+      </svg>`;
+      
+      return `<span style="display:inline-flex; align-items:center;">${svg} ${label} (${signal}%)</span>`;
     }
 
     async function scanWifi() {
@@ -706,7 +908,9 @@
           item.className = 'wifi-item' + (net.active ? ' active' : '');
           item.innerHTML = `
             <div class="wifi-name">${securityIcon(net.security)} ${net.ssid}</div>
-            <div class="wifi-meta">${net.signal}% ${net.active ? '· connected' : ''}</div>
+            <div class="wifi-meta" style="display:flex; align-items:center; gap:0.4rem;">
+              ${getSignalInfo(net.signal)} ${net.active ? '<span style="color:var(--ok);">· connected</span>' : ''}
+            </div>
           `;
           item.addEventListener('click', () => openWifiModal(net.ssid, net.security));
           wifiList.appendChild(item);
@@ -722,7 +926,10 @@
       pendingSsid = ssid;
       wifiModalMsg.textContent = `Connect to "${ssid}"`;
       wifiPasswordField.value = '';
-      wifiPasswordField.style.display = (security && security !== 'open' && security !== '--') ? 'block' : 'none';
+      wifiPasswordField.type = 'password';
+      eyeIcon.style.display = '';
+      eyeOffIcon.style.display = 'none';
+      wifiPasswordWrap.style.display = (security && security !== 'open' && security !== '--') ? 'block' : 'none';
       wifiModalBg.classList.add('open');
     }
 
@@ -757,6 +964,69 @@
     });
 
     wifiRefreshBtn.addEventListener('click', scanWifi);
+
+    // ---- Floating Wi-Fi Panel logic ----
+    const floatingWifiBtn = document.getElementById('floating-wifi-btn');
+    const wifiSection = document.getElementById('wifi-section');
+    const wifiPanelOverlay = document.getElementById('wifi-panel-overlay');
+    const wifiSectionClose = document.getElementById('wifi-section-close');
+
+    function openWifiPanel() {
+      wifiSection.classList.add('open');
+      wifiPanelOverlay.classList.add('open');
+    }
+
+    function closeWifiPanel() {
+      wifiSection.classList.remove('open');
+      wifiPanelOverlay.classList.remove('open');
+    }
+
+    floatingWifiBtn.addEventListener('click', openWifiPanel);
+    wifiSectionClose.addEventListener('click', closeWifiPanel);
+    wifiPanelOverlay.addEventListener('click', closeWifiPanel);
+
+    // ---- Ping Logic ----
+    const pingSelect = document.getElementById('ping-target-select');
+    const pingCustom = document.getElementById('ping-target-custom');
+    const pingBtn = document.getElementById('ping-btn');
+
+    pingSelect.addEventListener('change', () => {
+      if (pingSelect.value === 'custom') {
+        pingSelect.style.display = 'none';
+        pingCustom.style.display = 'block';
+        pingCustom.focus();
+      }
+    });
+
+    pingCustom.addEventListener('blur', () => {
+      if (!pingCustom.value.trim()) {
+        pingCustom.style.display = 'none';
+        pingSelect.style.display = 'block';
+        pingSelect.value = 'google.com';
+      }
+    });
+
+    pingBtn.addEventListener('click', async () => {
+      let target = pingSelect.value === 'custom' ? pingCustom.value.trim() : pingSelect.value;
+      if (!target) return;
+      pingBtn.classList.add('loading');
+      pingBtn.textContent = '...';
+      appendLog(`Pinging ${target}...`, 'info');
+      try {
+        const res = await fetch('/api/ping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target })
+        });
+        const data = await res.json();
+        appendLog(data.output, data.ok ? 'ok' : 'err');
+      } catch (e) {
+        appendLog('Error running ping.', 'err');
+      } finally {
+        pingBtn.classList.remove('loading');
+        pingBtn.textContent = 'Ping';
+      }
+    });
 
     refreshWifiCurrent();
     scanWifi();
