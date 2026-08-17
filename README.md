@@ -21,7 +21,7 @@ sudo bash setup.sh
 ```
 
 The script will:
-- Enable the USB gadget (`dwc2` + `g_ether`)
+- Enable the USB gadget (`dwc2` + `CDC NCM`)
 - Configure the static IP `10.55.55.1` on the `usb0` interface
 - Install `dnsmasq` to serve DHCP to the PC
 - Install Flask and start the panel as a service
@@ -32,7 +32,7 @@ The script will:
 Plug the USB cable into the **USB** port of the Pi Zero (not PWR).  
 The PC will automatically receive an IP in the `10.55.55.10–20` range.
 
-> The USB gadget uses **RNDIS with MS OS Descriptors** — Windows (7, 8, 10, 11) recognizes it automatically as a network adapter, **without manually installing any drivers**.
+> The USB gadget uses **CDC NCM** (Network Control Model) — a modern USB standard recognized natively by **Windows 10+, Linux and macOS**, without manually installing any drivers.
 
 ### 4. Open the panel
 
