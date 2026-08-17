@@ -4,11 +4,11 @@
 
 set -e
 
-echo "=== rasp-desk setup ==="
+echo "=== PiDongle setup ==="
 
 # --- Dependências ---
 apt-get update -y
-apt-get install -y python3 python3-pip python3-venv dnsmasq git tcpdump
+apt-get install -y python3 python3-pip python3-venv dnsmasq git tcpdump iptables
 
 # --- Detectar caminho de boot (Bookworm/Trixie usa /boot/firmware) ---
 if [ -d /boot/firmware ]; then
@@ -18,40 +18,39 @@ else
 fi
 CONFIG="$BOOT/config.txt"
 CMDLINE="$BOOT/cmdline.txt"
-echo "[boot] usando $BOOT"
+echo "[boot] using $BOOT"
 
-# --- Habilitar USB gadget (dwc2 + g_ether) ---
+# --- Habilitar USB gadget (dwc2 + CDC NCM) ---
 if ! grep -q "dtoverlay=dwc2" "$CONFIG"; then
     echo "dtoverlay=dwc2" >> "$CONFIG"
-    echo "[config.txt] dtoverlay=dwc2 adicionado"
+    echo "[config.txt] dtoverlay=dwc2 added"
 else
-    echo "[config.txt] dtoverlay=dwc2 já presente"
+    echo "[config.txt] dtoverlay=dwc2 already present"
 fi
 
-# Remove entradas antigas duplicadas de g_ether ou libcomposite
-sed -i 's/ modules-load=dwc2,g_ether//g; s/ modules-load=dwc2,libcomposite//g' "$CMDLINE"
+# Remove entradas antigas duplicadas de g_ether, libcomposite ou g_ncm
+sed -i 's/ modules-load=dwc2,g_ether//g; s/ modules-load=dwc2,libcomposite//g; s/ modules-load=dwc2,g_ncm//g' "$CMDLINE"
 
-# Adiciona libcomposite (RNDIS — compatível com Windows)
+# Adiciona libcomposite (CDC NCM — compatível com todos os SOs modernos)
 if grep -q "rootwait" "$CMDLINE"; then
     sed -i 's/rootwait/modules-load=dwc2,libcomposite rootwait/' "$CMDLINE"
 else
     sed -i 's/$/ modules-load=dwc2,libcomposite/' "$CMDLINE"
 fi
-echo "[cmdline.txt] módulos USB configurados: dwc2,libcomposite"
+echo "[cmdline.txt] USB modules configured: dwc2,libcomposite"
 
-# --- Script do gadget RNDIS com MS OS Descriptors (Windows auto-detecta) ---
+# --- Script do gadget CDC NCM (plug-and-play em Windows 10+, Linux e macOS) ---
 cat > /usr/local/bin/usb-gadget.sh <<'GADGET'
 #!/bin/bash
-# RNDIS com MS OS Descriptors: compatível com Windows (todas as versões)
+# CDC NCM: padrão USB moderno, reconhecido nativamente por todos os SOs
 modprobe libcomposite
-modprobe usb_f_rndis 2>/dev/null || true
+modprobe usb_f_ncm 2>/dev/null || true
 
 G=/sys/kernel/config/usb_gadget/pi
 
 # Desmonta gadget anterior completamente antes de reconfigurar
 if [ -d "$G" ]; then
     echo "" > "$G/UDC" 2>/dev/null || true
-    rm -f "$G/os_desc/c.1"               2>/dev/null || true
     rm -f "$G/configs/c.1/ncm.usb0"      2>/dev/null || true
     rm -f "$G/configs/c.1/rndis.usb0"    2>/dev/null || true
     rmdir "$G/configs/c.1/strings/0x409" 2>/dev/null || true
@@ -74,26 +73,16 @@ echo "raspberrypi0001" > strings/0x409/serialnumber
 echo "Raspberry Pi"    > strings/0x409/manufacturer
 echo "Pi USB Gadget"   > strings/0x409/product
 
-# --- RNDIS function ---
-mkdir -p functions/rndis.usb0
-echo "DE:AD:BE:EF:00:01" > functions/rndis.usb0/host_addr
-echo "DE:AD:BE:EF:00:02" > functions/rndis.usb0/dev_addr
-
-# --- MS OS Descriptors (Windows reconhece automaticamente como adaptador de rede) ---
-echo 1       > os_desc/use
-echo 0xcd    > os_desc/b_vendor_code
-echo MSFT100 > os_desc/qw_sign
-
-mkdir -p functions/rndis.usb0/os_desc/interface.rndis
-echo RNDIS   > functions/rndis.usb0/os_desc/interface.rndis/compatible_id
-echo 5162001 > functions/rndis.usb0/os_desc/interface.rndis/sub_compatible_id
+# --- CDC NCM function ---
+mkdir -p functions/ncm.usb0
+echo "DE:AD:BE:EF:00:01" > functions/ncm.usb0/host_addr
+echo "DE:AD:BE:EF:00:02" > functions/ncm.usb0/dev_addr
 
 mkdir -p configs/c.1/strings/0x409
-echo "RNDIS Network" > configs/c.1/strings/0x409/configuration
-echo 250             > configs/c.1/MaxPower
+echo "CDC NCM Network" > configs/c.1/strings/0x409/configuration
+echo 250               > configs/c.1/MaxPower
 
-ln -s "$G/functions/rndis.usb0" "$G/configs/c.1/"
-ln -s "$G/configs/c.1"          "$G/os_desc/"
+ln -s "$G/functions/ncm.usb0" "$G/configs/c.1/"
 
 # Ativar gadget
 ls /sys/class/udc > UDC
@@ -108,12 +97,12 @@ done
 ip link set usb0 up
 GADGET
 chmod +x /usr/local/bin/usb-gadget.sh
-echo "[gadget] script RNDIS criado"
+echo "[gadget] CDC NCM script created"
 
 # --- Serviço systemd para iniciar o gadget no boot ---
 cat > /etc/systemd/system/usb-gadget.service <<'EOF'
 [Unit]
-Description=USB RNDIS Gadget
+Description=USB CDC NCM Gadget
 After=sysinit.target
 Before=network.target
 
@@ -127,7 +116,7 @@ WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
 systemctl enable usb-gadget
-echo "[gadget] serviço habilitado"
+echo "[gadget] service enabled"
 
 # --- Interface usb0 com IP fixo (systemd-networkd) ---
 mkdir -p /etc/systemd/network
@@ -140,7 +129,7 @@ Address=10.55.55.1/24
 EOF
 systemctl enable systemd-networkd
 systemctl restart systemd-networkd
-echo "[network] usb0 configurado via systemd-networkd: 10.55.55.1"
+echo "[network] usb0 configured via systemd-networkd: 10.55.55.1"
 
 # --- dnsmasq: DHCP para o host via USB ---
 DNSMASQ_CONF=/etc/dnsmasq.d/usb0.conf
@@ -151,7 +140,7 @@ dhcp-range=10.55.55.10,10.55.55.20,24h
 dhcp-option=3
 dhcp-option=6
 EOF
-echo "[dnsmasq] DHCP configurado para usb0"
+echo "[dnsmasq] DHCP configured for usb0"
 
 # Garantir que dnsmasq inicie após o gadget USB estar pronto
 mkdir -p /etc/systemd/system/dnsmasq.service.d
@@ -160,13 +149,13 @@ cat > /etc/systemd/system/dnsmasq.service.d/wait-usb.conf <<'EOF'
 After=usb-gadget.service
 Wants=usb-gadget.service
 EOF
-echo "[dnsmasq] dependência no usb-gadget adicionada"
+echo "[dnsmasq] dependency on usb-gadget added"
 
 systemctl enable dnsmasq
 systemctl restart dnsmasq
 
-# --- Instalar app ---
-APP_DIR=/opt/rasp-desk
+# --- Install app ---
+APP_DIR=/opt/PiDongle
 mkdir -p "$APP_DIR"
 cp -r app "$APP_DIR/"
 cp -r scripts "$APP_DIR/"
@@ -178,15 +167,15 @@ venv/bin/pip install --upgrade pip
 venv/bin/pip install flask psutil
 
 # --- Systemd service ---
-cat > /etc/systemd/system/rasp-desk.service <<EOF
+cat > /etc/systemd/system/PiDongle.service <<EOF
 [Unit]
-Description=rasp-desk web control panel
+Description=PiDongle web control panel
 After=network.target usb-gadget.service
 Wants=usb-gadget.service
 
 [Service]
-ExecStart=/opt/rasp-desk/app/venv/bin/python /opt/rasp-desk/app/app.py
-WorkingDirectory=/opt/rasp-desk/app
+ExecStart=/opt/PiDongle/app/venv/bin/python /opt/PiDongle/app/app.py
+WorkingDirectory=/opt/PiDongle/app
 Restart=always
 User=root
 Environment=PYTHONUNBUFFERED=1
@@ -196,12 +185,12 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable rasp-desk
-systemctl restart rasp-desk
+systemctl enable PiDongle
+systemctl restart PiDongle
 
 echo ""
-echo "=== Setup concluído! ==="
-echo "Após reiniciar, acesse: http://10.55.55.1:5000"
-echo "Reiniciando em 5 segundos..."
+echo "=== Setup completed! ==="
+echo "After reboot, access: http://10.55.55.1:5000"
+echo "Rebooting in 5 seconds..."
 sleep 5
 reboot
