@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>rasp-desk</title>
+  <title>PiDongle</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:      #0f1117;
+      --bg: #0f1117;
       --surface: #1a1d27;
-      --border:  #2a2d3e;
-      --accent:  #7c6af7;
+      --border: #2a2d3e;
+      --accent: #7c6af7;
       --accent2: #5ee7df;
-      --text:    #e2e4f0;
-      --muted:   #8b8fa8;
-      --ok:      #4caf7d;
-      --err:     #f06464;
-      --warn:    #f0a644;
+      --text: #e2e4f0;
+      --muted: #8b8fa8;
+      --ok: #4caf7d;
+      --err: #f06464;
+      --warn: #f0a644;
     }
 
     body {
@@ -32,6 +39,7 @@
       text-align: center;
       margin-bottom: 2.5rem;
     }
+
     header h1 {
       font-size: 1.8rem;
       font-weight: 700;
@@ -40,7 +48,12 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header p { color: var(--muted); margin-top: .4rem; font-size: .9rem; }
+
+    header p {
+      color: var(--muted);
+      margin-top: .4rem;
+      font-size: .9rem;
+    }
 
     /* ---- Status bar ---- */
     #status-bar {
@@ -50,6 +63,7 @@
       justify-content: center;
       margin-bottom: 2.5rem;
     }
+
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -58,21 +72,44 @@
       min-width: 130px;
       text-align: center;
     }
-    .stat-card .label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-    .stat-card .value { font-size: 1.4rem; font-weight: 700; margin-top: .2rem; }
-    .stat-card .bar {
-      height: 4px; border-radius: 2px;
-      background: var(--border); margin-top: .5rem; overflow: hidden;
+
+    .stat-card .label {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
     }
+
+    .stat-card .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: .2rem;
+    }
+
+    .stat-card .bar {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: .5rem;
+      overflow: hidden;
+    }
+
     .stat-card .bar-fill {
-      height: 100%; border-radius: 2px;
+      height: 100%;
+      border-radius: 2px;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
       transition: width .6s ease;
     }
 
     /* ---- Actions grid ---- */
-    h2 { font-size: 1rem; color: var(--muted); text-transform: uppercase;
-         letter-spacing: .08em; margin-bottom: 1rem; text-align: center; }
+    h2 {
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
 
     #actions {
       display: grid;
@@ -94,17 +131,216 @@
       font-size: .9rem;
       font-weight: 600;
     }
+
     .action-btn:hover {
       border-color: var(--accent);
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(124,106,247,.2);
+      box-shadow: 0 4px 20px rgba(124, 106, 247, .2);
     }
-    .action-btn:active { transform: scale(.97); }
-    .action-btn .icon { font-size: 2rem; display: block; margin-bottom: .5rem; }
-    .action-btn.loading { opacity: .6; pointer-events: none; }
+
+    .action-btn:active {
+      transform: scale(.97);
+    }
+
+    .action-btn .icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .action-btn.loading {
+      opacity: .6;
+      pointer-events: none;
+    }
+
+    /* ---- Share Wi-Fi toggle ---- */
+    #share-section {
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .share-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: border-color .3s, box-shadow .3s;
+    }
+
+    .share-card.active {
+      border-color: var(--ok);
+      box-shadow: 0 0 20px rgba(76, 175, 125, .15);
+    }
+
+    .share-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .share-icon {
+      font-size: 2rem;
+    }
+
+    .share-label {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .share-status {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .15rem;
+    }
+
+    .share-status.on {
+      color: var(--ok);
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--border);
+      border-radius: 28px;
+      transition: background .3s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform .3s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: var(--ok);
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(24px);
+    }
+
+    .toggle.loading {
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    /* ---- Wi-Fi networks ---- */
+    #wifi-section {
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .wifi-current {
+      font-size: .82rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: .8rem;
+    }
+
+    .wifi-current .ssid {
+      color: var(--accent2);
+      font-weight: 700;
+    }
+
+    #wifi-list {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    .wifi-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+
+    .wifi-item:hover {
+      border-color: var(--accent);
+    }
+
+    .wifi-item.active {
+      border-color: var(--ok);
+    }
+
+    .wifi-item .wifi-name {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-weight: 600;
+      font-size: .9rem;
+    }
+
+    .wifi-item .wifi-meta {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .wifi-refresh {
+      display: block;
+      margin: 0 auto 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: .5rem 1.2rem;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+
+    .wifi-refresh:hover {
+      border-color: var(--accent);
+    }
+
+    #wifi-password-field {
+      display: none;
+      width: 100%;
+      margin-top: 1rem;
+      padding: .6rem .8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: .9rem;
+    }
 
     /* ---- Output log ---- */
-    #log-wrap { max-width: 720px; margin: 0 auto; }
+    #log-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
     #log {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -119,181 +355,412 @@
       color: var(--accent2);
       white-space: pre-wrap;
     }
-    #log .entry-ok   { color: var(--ok); }
-    #log .entry-err  { color: var(--err); }
-    #log .entry-info { color: var(--muted); }
+
+    #log .entry-ok {
+      color: var(--ok);
+    }
+
+    #log .entry-err {
+      color: var(--err);
+    }
+
+    #log .entry-info {
+      color: var(--muted);
+    }
 
     /* ---- Modal confirm ---- */
-    #modal-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center; z-index: 100;
+    #modal-bg,
+    #wifi-modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
     }
-    #modal-bg.open { display: flex; }
-    #modal {
+
+    #modal-bg.open,
+    #wifi-modal-bg.open {
+      display: flex;
+    }
+
+    #modal,
+    #wifi-modal {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 2rem;
-      max-width: 360px; width: 90%;
+      max-width: 360px;
+      width: 90%;
       text-align: center;
     }
-    #modal h3 { margin-bottom: .6rem; }
-    #modal p  { color: var(--muted); font-size: .9rem; margin-bottom: 1.5rem; }
-    .modal-btns { display: flex; gap: .8rem; justify-content: center; }
-    .btn {
-      padding: .6rem 1.4rem; border-radius: 8px; border: none;
-      cursor: pointer; font-weight: 600; font-size: .9rem;
+
+    #modal h3,
+    #wifi-modal h3 {
+      margin-bottom: .6rem;
     }
-    .btn-confirm { background: var(--accent); color: #fff; }
-    .btn-cancel  { background: var(--border);  color: var(--text); }
+
+    #modal p,
+    #wifi-modal p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: .8rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: .6rem 1.4rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .9rem;
+    }
+
+    .btn-confirm {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-cancel {
+      background: var(--border);
+      color: var(--text);
+    }
   </style>
 </head>
+
 <body>
 
-<header>
-  <h1>rasp-desk</h1>
-  <p>Raspberry Pi Zero 2 W · painel de controle</p>
-</header>
+  <header>
+    <h1>PiDongle</h1>
+    <p>Raspberry Pi Zero 2 W · Control Panel</p>
+  </header>
 
-<!-- Status -->
-<div id="status-bar">
-  <div class="stat-card">
-    <div class="label">CPU</div>
-    <div class="value" id="s-cpu">—</div>
-    <div class="bar"><div class="bar-fill" id="b-cpu" style="width:0"></div></div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Memória</div>
-    <div class="value" id="s-mem">—</div>
-    <div class="bar"><div class="bar-fill" id="b-mem" style="width:0"></div></div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Disco</div>
-    <div class="value" id="s-disk">—</div>
-    <div class="bar"><div class="bar-fill" id="b-disk" style="width:0"></div></div>
-  </div>
-  <div class="stat-card">
-    <div class="label">Temp.</div>
-    <div class="value" id="s-temp">—</div>
-  </div>
-</div>
-
-<!-- Ações -->
-<h2>Ações</h2>
-<div id="actions">
-  {% for id, action in actions.items() %}
-  <button class="action-btn"
-          data-id="{{ id }}"
-          data-label="{{ action.label }}"
-          data-confirm="{{ 'true' if action.confirm else 'false' }}">
-    <span class="icon">{{ action.icon }}</span>
-    {{ action.label }}
-  </button>
-  {% endfor %}
-</div>
-
-<!-- Log -->
-<div id="log-wrap">
-  <h2>Saída</h2>
-  <div id="log"><span class="entry-info">Aguardando ação...</span></div>
-</div>
-
-<!-- Modal -->
-<div id="modal-bg">
-  <div id="modal">
-    <h3 id="modal-title">Confirmar</h3>
-    <p id="modal-msg">Deseja executar esta ação?</p>
-    <div class="modal-btns">
-      <button class="btn btn-cancel"  id="btn-cancel">Cancelar</button>
-      <button class="btn btn-confirm" id="btn-confirm">Confirmar</button>
+  <!-- Status -->
+  <div id="status-bar">
+    <div class="stat-card">
+      <div class="label">CPU</div>
+      <div class="value" id="s-cpu">—</div>
+      <div class="bar">
+        <div class="bar-fill" id="b-cpu" style="width:0"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Memory</div>
+      <div class="value" id="s-mem">—</div>
+      <div class="bar">
+        <div class="bar-fill" id="b-mem" style="width:0"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Disk</div>
+      <div class="value" id="s-disk">—</div>
+      <div class="bar">
+        <div class="bar-fill" id="b-disk" style="width:0"></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Temp.</div>
+      <div class="value" id="s-temp">—</div>
     </div>
   </div>
-</div>
 
-<script>
-  // ---- Status polling ----
-  async function refreshStatus() {
-    try {
-      const d = await fetch('/api/status').then(r => r.json());
-      document.getElementById('s-cpu').textContent  = d.cpu_percent + '%';
-      document.getElementById('s-mem').textContent  = d.mem_percent + '%';
-      document.getElementById('s-disk').textContent = d.disk_percent + '%';
-      document.getElementById('s-temp').textContent = d.temp_c != null ? d.temp_c + '°C' : '—';
-      document.getElementById('b-cpu').style.width  = d.cpu_percent  + '%';
-      document.getElementById('b-mem').style.width  = d.mem_percent  + '%';
-      document.getElementById('b-disk').style.width = d.disk_percent + '%';
-    } catch(e) { /* Pi reiniciando */ }
-  }
-  refreshStatus();
-  setInterval(refreshStatus, 4000);
+  <!-- Actions -->
+  <h2>Actions</h2>
+  <div id="actions">
+    {% for id, action in actions.items() %}
+    <button class="action-btn" data-id="{{ id }}" data-label="{{ action.label }}"
+      data-confirm="{{ 'true' if action.confirm else 'false' }}">
+      <span class="icon">{{ action.icon }}</span>
+      {{ action.label }}
+    </button>
+    {% endfor %}
+  </div>
 
-  // ---- Log helper ----
-  const logEl = document.getElementById('log');
-  function appendLog(text, type = 'ok') {
-    const ts = new Date().toLocaleTimeString('pt-BR');
-    const span = document.createElement('span');
-    span.className = 'entry-' + type;
-    span.textContent = `[${ts}] ${text}\n`;
-    logEl.textContent = '';
-    logEl.appendChild(span);
-  }
+  <!-- Share Wi-Fi -->
+  <div id="share-section">
+    <h2>Internet Sharing</h2>
+    <div class="share-card" id="share-card">
+      <div class="share-info">
+        <span class="share-icon">📡</span>
+        <div>
+          <div class="share-label">Share Wi-Fi → USB</div>
+          <div class="share-status" id="share-status">Checking...</div>
+        </div>
+      </div>
+      <label class="toggle" id="share-toggle">
+        <input type="checkbox" id="share-check">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
 
-  // ---- Modal ----
-  const modalBg    = document.getElementById('modal-bg');
-  const modalTitle = document.getElementById('modal-title');
-  const modalMsg   = document.getElementById('modal-msg');
-  const btnConfirm = document.getElementById('btn-confirm');
-  const btnCancel  = document.getElementById('btn-cancel');
+  <!-- Wi-Fi Networks -->
+  <div id="wifi-section">
+    <h2>Wi-Fi Network</h2>
+    <div class="wifi-current">Connected to: <span class="ssid" id="wifi-current">—</span></div>
+    <button class="wifi-refresh" id="wifi-refresh">🔄 Scan networks</button>
+    <div id="wifi-list"><span class="entry-info" style="color:var(--muted)">Scanning...</span></div>
+  </div>
 
-  let pendingAction = null;
+  <!-- Log -->
+  <div id="log-wrap">
+    <h2>Output</h2>
+    <div id="log"><span class="entry-info">Waiting for action...</span></div>
+  </div>
 
-  function openModal(label, id) {
-    modalTitle.textContent = label;
-    modalMsg.textContent   = `Tem certeza que deseja executar: "${label}"?`;
-    pendingAction = id;
-    modalBg.classList.add('open');
-  }
+  <!-- Modal -->
+  <div id="modal-bg">
+    <div id="modal">
+      <h3 id="modal-title">Confirm</h3>
+      <p id="modal-msg">Do you want to execute this action?</p>
+      <div class="modal-btns">
+        <button class="btn btn-cancel" id="btn-cancel">Cancel</button>
+        <button class="btn btn-confirm" id="btn-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
 
-  btnCancel.addEventListener('click', () => {
-    modalBg.classList.remove('open');
-    pendingAction = null;
-  });
-  modalBg.addEventListener('click', e => {
-    if (e.target === modalBg) btnCancel.click();
-  });
+  <!-- Wi-Fi connect modal -->
+  <div id="wifi-modal-bg">
+    <div id="wifi-modal">
+      <h3 id="wifi-modal-title">Connect</h3>
+      <p id="wifi-modal-msg">Enter the network password:</p>
+      <input type="password" id="wifi-password-field" placeholder="Password (leave blank if open)">
+      <div class="modal-btns" style="margin-top:1.5rem">
+        <button class="btn btn-cancel" id="wifi-btn-cancel">Cancel</button>
+        <button class="btn btn-confirm" id="wifi-btn-confirm">Connect</button>
+      </div>
+    </div>
+  </div>
 
-  btnConfirm.addEventListener('click', () => {
-    modalBg.classList.remove('open');
-    if (pendingAction) executeAction(pendingAction);
-    pendingAction = null;
-  });
-
-  // ---- Execute ----
-  async function executeAction(id) {
-    const btn = document.querySelector(`.action-btn[data-id="${id}"]`);
-    if (btn) btn.classList.add('loading');
-    appendLog(`Executando: ${id}...`, 'info');
-    try {
-      const res = await fetch(`/api/action/${id}`, { method: 'POST' });
-      const data = await res.json();
-      appendLog(data.output, data.ok ? 'ok' : 'err');
-    } catch(e) {
-      appendLog('Erro de comunicação com o Pi.', 'err');
-    } finally {
-      if (btn) btn.classList.remove('loading');
+  <script>
+    // ---- Status polling ----
+    async function refreshStatus() {
+      try {
+        const d = await fetch('/api/status').then(r => r.json());
+        document.getElementById('s-cpu').textContent = d.cpu_percent + '%';
+        document.getElementById('s-mem').textContent = d.mem_percent + '%';
+        document.getElementById('s-disk').textContent = d.disk_percent + '%';
+        document.getElementById('s-temp').textContent = d.temp_c != null ? d.temp_c + '°C' : '—';
+        document.getElementById('b-cpu').style.width = d.cpu_percent + '%';
+        document.getElementById('b-mem').style.width = d.mem_percent + '%';
+        document.getElementById('b-disk').style.width = d.disk_percent + '%';
+      } catch (e) { /* Pi reiniciando */ }
     }
-  }
+    refreshStatus();
+    setInterval(refreshStatus, 4000);
 
-  // ---- Button click handler ----
-  document.getElementById('actions').addEventListener('click', e => {
-    const btn = e.target.closest('.action-btn');
-    if (!btn) return;
-    const id      = btn.dataset.id;
-    const label   = btn.dataset.label;
-    const confirm = btn.dataset.confirm === 'true';
-    confirm ? openModal(label, id) : executeAction(id);
-  });
-</script>
+    // ---- Log helper ----
+    const logEl = document.getElementById('log');
+    function appendLog(text, type = 'ok') {
+      const ts = new Date().toLocaleTimeString('en-US');
+      const span = document.createElement('span');
+      span.className = 'entry-' + type;
+      span.textContent = `[${ts}] ${text}\n`;
+      logEl.textContent = '';
+      logEl.appendChild(span);
+    }
+
+    // ---- Modal ----
+    const modalBg = document.getElementById('modal-bg');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMsg = document.getElementById('modal-msg');
+    const btnConfirm = document.getElementById('btn-confirm');
+    const btnCancel = document.getElementById('btn-cancel');
+
+    let pendingAction = null;
+
+    function openModal(label, id) {
+      modalTitle.textContent = label;
+      modalMsg.textContent = `Are you sure you want to execute: "${label}"?`;
+      pendingAction = id;
+      modalBg.classList.add('open');
+    }
+
+    btnCancel.addEventListener('click', () => {
+      modalBg.classList.remove('open');
+      pendingAction = null;
+    });
+    modalBg.addEventListener('click', e => {
+      if (e.target === modalBg) btnCancel.click();
+    });
+
+    btnConfirm.addEventListener('click', () => {
+      modalBg.classList.remove('open');
+      if (pendingAction) executeAction(pendingAction);
+      pendingAction = null;
+    });
+
+    // ---- Execute ----
+    async function executeAction(id) {
+      const btn = document.querySelector(`.action-btn[data-id="${id}"]`);
+      if (btn) btn.classList.add('loading');
+      appendLog(`Executing: ${id}...`, 'info');
+      try {
+        const res = await fetch(`/api/action/${id}`, { method: 'POST' });
+        const data = await res.json();
+        appendLog(data.output, data.ok ? 'ok' : 'err');
+      } catch (e) {
+        appendLog('Error communicating with the Pi.', 'err');
+      } finally {
+        if (btn) btn.classList.remove('loading');
+      }
+    }
+
+    // ---- Button click handler ----
+    document.getElementById('actions').addEventListener('click', e => {
+      const btn = e.target.closest('.action-btn');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const label = btn.dataset.label;
+      const confirm = btn.dataset.confirm === 'true';
+      confirm ? openModal(label, id) : executeAction(id);
+    });
+
+    // ---- Share Wi-Fi toggle ----
+    const shareCard = document.getElementById('share-card');
+    const shareCheck = document.getElementById('share-check');
+    const shareToggle = document.getElementById('share-toggle');
+    const shareStatus = document.getElementById('share-status');
+
+    function updateShareUI(active) {
+      shareCheck.checked = active;
+      shareCard.classList.toggle('active', active);
+      shareStatus.textContent = active ? 'Active — routing Wi-Fi to your PC' : 'Inactive — USB local only';
+      shareStatus.className = 'share-status' + (active ? ' on' : '');
+    }
+
+    // Check initial state
+    async function checkShareStatus() {
+      try {
+        const d = await fetch('/api/share_wifi/status').then(r => r.json());
+        updateShareUI(d.active);
+      } catch (e) {
+        shareStatus.textContent = 'Unable to check status';
+      }
+    }
+    checkShareStatus();
+
+    shareCheck.addEventListener('change', async () => {
+      shareToggle.classList.add('loading');
+      const desired = shareCheck.checked;
+      appendLog(desired ? 'Enabling internet sharing...' : 'Disabling internet sharing...', 'info');
+      try {
+        const res = await fetch('/api/share_wifi/toggle', { method: 'POST' });
+        const data = await res.json();
+        updateShareUI(data.active);
+        appendLog(data.output, data.ok ? 'ok' : 'err');
+      } catch (e) {
+        shareCheck.checked = !desired;
+        appendLog('Error toggling internet sharing.', 'err');
+      } finally {
+        shareToggle.classList.remove('loading');
+      }
+    });
+
+    // ---- Wi-Fi networks ----
+    const wifiList = document.getElementById('wifi-list');
+    const wifiCurrent = document.getElementById('wifi-current');
+    const wifiRefreshBtn = document.getElementById('wifi-refresh');
+    const wifiModalBg = document.getElementById('wifi-modal-bg');
+    const wifiModalMsg = document.getElementById('wifi-modal-msg');
+    const wifiPasswordField = document.getElementById('wifi-password-field');
+    const wifiBtnConfirm = document.getElementById('wifi-btn-confirm');
+    const wifiBtnCancel = document.getElementById('wifi-btn-cancel');
+
+    let pendingSsid = null;
+
+    function securityIcon(security) {
+      return security && security !== 'open' && security !== '--' ? '🔒' : '🔓';
+    }
+
+    async function refreshWifiCurrent() {
+      try {
+        const d = await fetch('/api/wifi/current').then(r => r.json());
+        wifiCurrent.textContent = d.ssid || 'Not connected';
+      } catch (e) {
+        wifiCurrent.textContent = '—';
+      }
+    }
+
+    async function scanWifi() {
+      wifiList.innerHTML = '<span class="entry-info" style="color:var(--muted)">Scanning...</span>';
+      wifiRefreshBtn.disabled = true;
+      try {
+        const d = await fetch('/api/wifi/scan').then(r => r.json());
+        wifiList.innerHTML = '';
+        if (!d.ok || d.networks.length === 0) {
+          wifiList.innerHTML = '<span class="entry-info" style="color:var(--muted)">No networks found.</span>';
+          return;
+        }
+        d.networks.forEach(net => {
+          const item = document.createElement('div');
+          item.className = 'wifi-item' + (net.active ? ' active' : '');
+          item.innerHTML = `
+            <div class="wifi-name">${securityIcon(net.security)} ${net.ssid}</div>
+            <div class="wifi-meta">${net.signal}% ${net.active ? '· connected' : ''}</div>
+          `;
+          item.addEventListener('click', () => openWifiModal(net.ssid, net.security));
+          wifiList.appendChild(item);
+        });
+      } catch (e) {
+        wifiList.innerHTML = '<span class="entry-info" style="color:var(--err)">Error scanning networks.</span>';
+      } finally {
+        wifiRefreshBtn.disabled = false;
+      }
+    }
+
+    function openWifiModal(ssid, security) {
+      pendingSsid = ssid;
+      wifiModalMsg.textContent = `Connect to "${ssid}"`;
+      wifiPasswordField.value = '';
+      wifiPasswordField.style.display = (security && security !== 'open' && security !== '--') ? 'block' : 'none';
+      wifiModalBg.classList.add('open');
+    }
+
+    wifiBtnCancel.addEventListener('click', () => {
+      wifiModalBg.classList.remove('open');
+      pendingSsid = null;
+    });
+    wifiModalBg.addEventListener('click', e => {
+      if (e.target === wifiModalBg) wifiBtnCancel.click();
+    });
+
+    wifiBtnConfirm.addEventListener('click', async () => {
+      if (!pendingSsid) return;
+      const ssid = pendingSsid;
+      const password = wifiPasswordField.value;
+      wifiModalBg.classList.remove('open');
+      pendingSsid = null;
+      appendLog(`Connecting to "${ssid}"...`, 'info');
+      try {
+        const res = await fetch('/api/wifi/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ssid, password })
+        });
+        const data = await res.json();
+        appendLog(data.output, data.ok ? 'ok' : 'err');
+        await refreshWifiCurrent();
+        await scanWifi();
+      } catch (e) {
+        appendLog('Error connecting to Wi-Fi network.', 'err');
+      }
+    });
+
+    wifiRefreshBtn.addEventListener('click', scanWifi);
+
+    refreshWifiCurrent();
+    scanWifi();
+  </script>
 </body>
+
 </html>
