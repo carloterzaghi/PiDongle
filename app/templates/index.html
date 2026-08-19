@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PiDongle</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
     *,
     *::before,
     *::after {
@@ -15,82 +17,114 @@
     }
 
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2d3e;
-      --accent: #7c6af7;
-      --accent2: #5ee7df;
-      --text: #e2e4f0;
-      --muted: #8b8fa8;
-      --ok: #4caf7d;
-      --err: #f06464;
-      --warn: #f0a644;
+      --bg: #0b0f19;
+      --surface: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #8b5cf6;
+      --accent2: #3b82f6;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --ok: #10b981;
+      --err: #ef4444;
+      --warn: #f59e0b;
+      --glass-blur: blur(16px);
+      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     }
 
     body {
-      background: var(--bg);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.12), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.12), transparent 40%);
+      background-attachment: fixed;
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1.5rem;
+      overflow-x: hidden;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
 
     header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: -0.03em;
     }
 
     header p {
       color: var(--muted);
-      margin-top: .4rem;
-      font-size: .9rem;
+      margin-top: .5rem;
+      font-size: 1rem;
+      font-weight: 500;
     }
 
     /* ---- Status bar ---- */
     #status-bar {
       display: flex;
-      gap: 1rem;
+      gap: 1.2rem;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
 
     .stat-card {
       background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: .9rem 1.4rem;
-      min-width: 130px;
+      border-radius: 16px;
+      padding: 1.2rem 1.6rem;
+      min-width: 140px;
       text-align: center;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
     }
 
     .stat-card .label {
-      font-size: .72rem;
+      font-size: .75rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: .05em;
+      letter-spacing: .06em;
+      font-weight: 600;
     }
 
     .stat-card .value {
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      margin-top: .2rem;
+      margin-top: .4rem;
+      letter-spacing: -0.02em;
     }
 
     .stat-card .bar {
       height: 4px;
       border-radius: 2px;
-      background: var(--border);
-      margin-top: .5rem;
+      background: rgba(255, 255, 255, 0.1);
+      margin-top: .6rem;
       overflow: hidden;
     }
 
@@ -98,57 +132,83 @@
       height: 100%;
       border-radius: 2px;
       background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width .6s ease;
+      transition: width .8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    /* ---- Actions grid ---- */
+    /* ---- System grid ---- */
     h2 {
-      font-size: 1rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: .02em;
+      margin-bottom: 1.2rem;
       text-align: center;
     }
 
-    #actions {
+    #system {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
+      gap: 1.2rem;
       max-width: 720px;
-      margin: 0 auto 2.5rem;
+      margin: 0 auto 3rem;
     }
 
-    .action-btn {
+    .system-btn {
       background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.4rem 1rem;
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
       cursor: pointer;
       text-align: center;
-      transition: border-color .2s, transform .15s, box-shadow .2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       color: var(--text);
-      font-size: .9rem;
+      font-size: .95rem;
       font-weight: 600;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
     }
 
-    .action-btn:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(124, 106, 247, .2);
+    .system-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
-    .action-btn:active {
+    .system-btn:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.15);
+    }
+
+    .system-btn:hover::before {
+      opacity: 1;
+    }
+
+    .system-btn:active {
       transform: scale(.97);
     }
 
-    .action-btn .icon {
-      font-size: 2rem;
+    .system-btn .icon {
+      font-size: 2.2rem;
       display: block;
-      margin-bottom: .5rem;
+      margin-bottom: .8rem;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .action-btn.loading {
+    .system-btn:hover .icon {
+      transform: scale(1.15) rotate(2deg);
+    }
+
+    .system-btn.loading {
       opacity: .6;
       pointer-events: none;
     }
@@ -161,19 +221,27 @@
 
     .share-card {
       background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      padding: 1.5rem 1.6rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      transition: border-color .3s, box-shadow .3s;
+      gap: 1.2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+    }
+
+    .share-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     }
 
     .share-card.active {
-      border-color: var(--ok);
-      box-shadow: 0 0 20px rgba(76, 175, 125, .15);
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
     }
 
     .share-info {
@@ -236,11 +304,11 @@
       transition: transform .3s;
     }
 
-    .toggle input:checked + .toggle-slider {
+    .toggle input:checked+.toggle-slider {
       background: var(--ok);
     }
 
-    .toggle input:checked + .toggle-slider::before {
+    .toggle input:checked+.toggle-slider::before {
       transform: translateX(24px);
     }
 
@@ -249,33 +317,66 @@
       pointer-events: none;
     }
 
+    /* ---- 9Router open button ---- */
+    #ia-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--ok);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform: scale(0.85);
+      pointer-events: none;
+    }
+
+    #ia-open-btn.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    #ia-open-btn:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--ok);
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+    }
+
     /* ---- Wi-Fi networks panel ---- */
     #floating-wifi-btn {
       position: fixed;
-      right: 1.5rem;
-      bottom: 1.5rem;
-      width: 56px;
-      height: 56px;
+      right: 2rem;
+      bottom: 2rem;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: #fff;
       border: none;
-      box-shadow: 0 4px 20px rgba(124, 106, 247, .4);
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 90;
-      transition: transform .2s, box-shadow .2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     #floating-wifi-btn:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 6px 24px rgba(124, 106, 247, .6);
+      transform: translateY(-4px) scale(1.05) rotate(5deg);
+      box-shadow: 0 12px 40px rgba(139, 92, 246, 0.6);
     }
 
     #floating-wifi-btn:active {
-      transform: scale(.95);
+      transform: scale(.92);
     }
 
     #floating-wifi-btn svg {
@@ -302,17 +403,19 @@
     #wifi-section {
       position: fixed;
       top: 0;
-      right: -360px;
+      right: -380px;
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       height: 100vh;
-      background: var(--surface);
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border-left: 1px solid var(--border);
-      padding: 2rem 1.5rem;
+      padding: 2.5rem 1.5rem;
       z-index: 95;
       overflow-y: auto;
-      transition: right .3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: -4px 0 24px rgba(0,0,0,0.4);
+      transition: right .4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
     }
 
     #wifi-section.open {
@@ -460,22 +563,28 @@
     /* ---- Output log ---- */
     #log-wrap {
       max-width: 720px;
-      margin: 0 auto;
+      margin: 0 auto 2.5rem;
+      position: sticky;
+      top: 1rem;
+      z-index: 85;
     }
 
     #log {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--accent);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: .82rem;
+      font-size: .85rem;
       line-height: 1.6;
-      min-height: 80px;
-      max-height: 260px;
+      min-height: 60px;
+      max-height: 180px;
       overflow-y: auto;
-      color: var(--accent2);
+      color: #94a3b8;
       white-space: pre-wrap;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     #log .entry-ok {
@@ -496,11 +605,12 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, .6);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: var(--glass-blur);
       align-items: center;
       justify-content: center;
       z-index: 100;
+      animation: fadeIn 0.3s ease;
     }
 
     #modal-bg.open,
@@ -511,12 +621,15 @@
     #modal,
     #wifi-modal {
       background: var(--surface);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 360px;
+      border-radius: 20px;
+      padding: 2.5rem;
+      max-width: 380px;
       width: 90%;
       text-align: center;
+      box-shadow: var(--shadow);
     }
 
     #modal h3,
@@ -554,6 +667,201 @@
     .btn-cancel {
       background: var(--border);
       color: var(--text);
+    }
+
+    /* ---- File Manager Modal ---- */
+    #fm-modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      z-index: 105;
+    }
+
+    #fm-modal-bg.open {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #fm-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 550px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    #fm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    #fm-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.8rem;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    #fm-close:hover {
+      color: var(--err);
+    }
+
+    #fm-quota-wrap {
+      margin-bottom: 1rem;
+    }
+
+    #fm-quota-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 0.3rem;
+    }
+
+    #fm-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+      background: var(--bg);
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    #fm-btn-back,
+    #fm-btn-mkdir {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: border 0.2s;
+    }
+
+    #fm-btn-back:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #fm-btn-back:not(:disabled):hover,
+    #fm-btn-mkdir:hover {
+      border-color: var(--accent);
+    }
+
+    #fm-path {
+      font-size: 0.85rem;
+      color: var(--accent);
+      flex-grow: 1;
+      margin: 0 1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #fm-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      background: var(--bg);
+      min-height: 200px;
+    }
+
+    .fm-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .6rem .8rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .fm-item:hover {
+      background: var(--surface);
+    }
+
+    .fm-item:last-child {
+      border-bottom: none;
+    }
+
+    .fm-icon {
+      margin-right: 0.8rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .fm-name {
+      flex-grow: 1;
+      word-break: break-all;
+      margin-right: 1rem;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+
+    .fm-name:hover {
+      color: var(--accent);
+    }
+
+    .fm-size {
+      color: var(--muted);
+      font-size: .8rem;
+      margin-right: 1rem;
+      white-space: nowrap;
+    }
+
+    .fm-actions button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: .3rem .6rem;
+      cursor: pointer;
+      margin-left: .3rem;
+      font-size: .8rem;
+      transition: all 0.2s;
+    }
+
+    .fm-actions button:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .fm-actions .fm-del:hover {
+      border-color: var(--err);
+      color: var(--err);
+    }
+
+    #fm-upload-wrap {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+
+    #fm-upload-wrap input[type=file] {
+      flex-grow: 1;
+      padding: .4rem;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-size: .8rem;
+      color: var(--text);
+      background: var(--bg);
     }
   </style>
 </head>
@@ -594,11 +902,16 @@
     </div>
   </div>
 
-  <!-- Actions -->
-  <h2>Actions</h2>
-  <div id="actions">
-    {% for id, action in actions.items() %}
-    <button class="action-btn" data-id="{{ id }}" data-label="{{ action.label }}"
+  <!-- Output Log (Sticky) -->
+  <div id="log-wrap">
+    <div id="log"><span class="entry-info">Ready. Waiting for commands...</span></div>
+  </div>
+
+  <!-- System -->
+  <h2>System</h2>
+  <div id="system">
+    {% for id, action in system_actions.items() %}
+    <button class="system-btn" data-id="{{ id }}" data-label="{{ action.label }}"
       data-confirm="{{ 'true' if action.confirm else 'false' }}">
       <span class="icon">{{ action.icon }}</span>
       {{ action.label }}
@@ -606,10 +919,56 @@
     {% endfor %}
   </div>
 
+  <!-- IA Section -->
+  <div id="ia-section" style="max-width: 720px; margin: 0 auto 2.5rem;">
+    <h2>Artificial intelligence</h2>
+
+    <div class="share-card" id="ia-card" style="margin-bottom: 1rem;">
+      <div class="share-info">
+        <span class="share-icon" style="font-size: 2.2rem;">🤖</span>
+        <div>
+          <div class="share-label">9Router AI Gateway</div>
+          <div class="share-status" id="ia-status">Checking...</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem;">Initial password:
+            <strong>passworld123</strong>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.75rem; flex-shrink:0;">
+        <a id="ia-open-btn" href="http://10.55.55.1:20128/dashboard" target="_blank" rel="noopener noreferrer"
+          title="Open 9Router AI Gateway" style="display:none;">
+          Open ↗
+        </a>
+        <label class="toggle" id="ia-toggle">
+          <input type="checkbox" id="ia-check">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Claude Code card -->
+    <div class="share-card" id="claude-card">
+      <div class="share-info">
+        <span class="share-icon" style="font-size: 2.2rem;">✨</span>
+        <div>
+          <div class="share-label">Claude Code</div>
+          <div class="share-status" id="claude-card-status">Offline — Ready to start</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem;">Runs inside /Storage</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.75rem; flex-shrink:0;">
+        <label class="toggle" id="claude-toggle">
+          <input type="checkbox" id="claude-check">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
   <!-- Internet Section -->
   <div id="internet-section" style="max-width: 720px; margin: 0 auto 2.5rem;">
     <h2>Internet</h2>
-    
+
     <!-- Share Wi-Fi -->
     <div class="share-card" id="share-card" style="margin-bottom: 1rem;">
       <div class="share-info">
@@ -639,7 +998,8 @@
               <option value="8.8.8.8">8.8.8.8 (Google DNS)</option>
               <option value="custom">Custom...</option>
             </select>
-            <input type="text" id="ping-target-custom" class="ping-input" placeholder="e.g. 192.168.1.1" style="display:none; flex-grow:1; max-width:200px;">
+            <input type="text" id="ping-target-custom" class="ping-input" placeholder="e.g. 192.168.1.1"
+              style="display:none; flex-grow:1; max-width:200px;">
             <button id="ping-btn" class="wifi-refresh" style="margin:0; padding: 0.4rem 1rem;">Ping</button>
           </div>
         </div>
@@ -649,7 +1009,13 @@
 
   <!-- Floating Wi-Fi Button & Panel -->
   <button id="floating-wifi-btn" aria-label="Wi-Fi Networks">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+      <line x1="12" y1="20" x2="12.01" y2="20" />
+    </svg>
   </button>
   <div id="wifi-panel-overlay"></div>
   <div id="wifi-section">
@@ -662,11 +1028,6 @@
     <div id="wifi-list"><span class="entry-info" style="color:var(--muted)">Scanning...</span></div>
   </div>
 
-  <!-- Log -->
-  <div id="log-wrap">
-    <h2>Output</h2>
-    <div id="log"><span class="entry-info">Waiting for action...</span></div>
-  </div>
 
   <!-- Modal -->
   <div id="modal-bg">
@@ -688,20 +1049,167 @@
       <div id="wifi-password-wrap">
         <input type="password" id="wifi-password-field" placeholder="Password (leave blank if open)">
         <button id="wifi-password-toggle" type="button" tabindex="-1" aria-label="Show password">
-          <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+          <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
           </svg>
-          <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-            <line x1="1" y1="1" x2="23" y2="23"/>
+          <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+            <line x1="1" y1="1" x2="23" y2="23" />
           </svg>
         </button>
       </div>
       <div class="modal-btns" style="margin-top:1.5rem">
         <button class="btn btn-cancel" id="wifi-btn-cancel">Cancel</button>
         <button class="btn btn-confirm" id="wifi-btn-confirm">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Manager Modal -->
+  <div id="fm-modal-bg">
+    <div id="fm-modal">
+      <div id="fm-header">
+        <h3 style="margin:0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;"><span>💾</span>
+          Storage</h3>
+        <button id="fm-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="fm-quota-wrap">
+        <div id="fm-quota-text">Calculating...</div>
+        <div class="stat-card" style="margin:0; padding:0; background:transparent; border:none;">
+          <div class="bar" style="margin:0; background:var(--bg);">
+            <div class="bar-fill" id="fm-quota-bar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div id="fm-nav">
+        <button id="fm-btn-back" disabled>⬅️ Back</button>
+        <span id="fm-path">/</span>
+        <button id="fm-btn-mkdir">➕ Folder</button>
+      </div>
+      <div id="fm-list">
+        <div style="padding:1rem; text-align:center; color:var(--muted); font-size:0.9rem;">Loading...</div>
+      </div>
+      <div id="fm-upload-wrap">
+        <input type="file" id="fm-file-input">
+        <button class="btn btn-confirm" id="fm-btn-upload" style="padding: 0.5rem 1rem;">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDE Modal -->
+  <div id="ide-modal-bg"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:200; align-items:center; justify-content:center;">
+    <div
+      style="width:95%; height:90%; background:#1e1e1e; color:#d4d4d4; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow:0 10px 40px rgba(0,0,0,0.8);">
+      <!-- Top bar -->
+      <div
+        style="background:#252526; padding:0.5rem 1rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <span style="color:#007acc; font-weight:bold;">PiVSCode</span>
+          <span id="ide-current-file" style="font-size:0.9rem; color:#858585;">No file selected</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button id="ide-btn-save"
+            style="background:#0e639c; color:white; border:none; border-radius:4px; padding:4px 12px; cursor:pointer;">💾
+            Save</button>
+          <button id="ide-btn-run"
+            style="background:#4CAF50; color:white; border:none; border-radius:4px; padding:4px 12px; cursor:pointer;">▶
+            Run</button>
+          <button id="ide-btn-close"
+            style="background:transparent; color:#d4d4d4; border:none; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+      </div>
+      <!-- Main content -->
+      <div style="display:flex; flex-grow:1; overflow:hidden;">
+        <!-- Sidebar -->
+        <div style="width:200px; background:#252526; border-right:1px solid #333; display:flex; flex-direction:column;">
+          <div style="padding:10px; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:#858585;">
+            Explorer</div>
+          <div id="ide-sidebar-list" style="flex-grow:1; overflow-y:auto; padding:5px 0;">
+            <!-- Items injected here -->
+          </div>
+        </div>
+        <!-- Editor & Output -->
+        <div style="flex-grow:1; display:flex; flex-direction:column;">
+          <textarea id="ide-editor" spellcheck="false"
+            style="flex-grow:1; background:#1e1e1e; color:#d4d4d4; border:none; padding:15px; font-family:'Courier New', Courier, monospace; font-size:14px; outline:none; resize:none;"
+            placeholder="Select a .py file from the Explorer to edit..."></textarea>
+          <!-- Output Terminal -->
+          <div
+            style="height:150px; background:#1e1e1e; border-top:1px solid #333; display:flex; flex-direction:column;">
+            <div
+              style="padding:5px 15px; font-size:0.8rem; background:#252526; border-bottom:1px solid #333; color:#858585;">
+              TERMINAL</div>
+            <pre id="ide-output"
+              style="flex-grow:1; margin:0; padding:10px 15px; overflow-y:auto; font-family:'Courier New', Courier, monospace; font-size:12px; color:#cccccc; white-space:pre-wrap;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terminal Modal -->
+  <div id="term-modal-bg"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:205; align-items:center; justify-content:center;">
+    <div
+      style="width:95%; height:85%; max-width:900px; background:#0c0c0c; border:1px solid #333; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; font-family:'Courier New', Courier, monospace; box-shadow:0 10px 40px rgba(0,0,0,0.9);">
+      <!-- Header -->
+      <div
+        style="background:#1a1a1a; padding:0.5rem 1rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333;">
+        <span style="color:#fff; font-weight:bold; font-family:'Segoe UI', sans-serif;">PiTerminal</span>
+        <button id="term-btn-close"
+          style="background:transparent; color:#aaa; border:none; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      <!-- Output Area -->
+      <div id="term-output"
+        style="flex-grow:1; padding:15px; color:#0f0; overflow-y:auto; font-size:14px; white-space:pre-wrap; word-break:break-all;">
+        PiDongle Web Terminal v1.0
+        Type 'clear' to clear the screen.
+      </div>
+      <!-- Input Area -->
+      <div style="display:flex; padding:10px 15px; background:#111; border-top:1px solid #333; align-items:center;">
+        <span id="term-prompt"
+          style="color:#0ff; margin-right:8px; font-weight:bold; font-size:14px;">root@pidongle:/opt/PiDongle#</span>
+        <input type="text" id="term-input" autocomplete="off" spellcheck="false"
+          style="flex-grow:1; background:transparent; border:none; color:#0f0; font-family:'Courier New', Courier, monospace; font-size:14px; outline:none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Claude Code Terminal Modal -->
+  <div id="claude-modal-bg" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:210;"
+    class="claude-modal-outer">
+    <div
+      style="width:95%; height:85%; max-width:920px; background:#0d0d1a; border:1px solid rgba(139,92,246,0.45); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; font-family:'Courier New',Courier,monospace; box-shadow:0 0 60px rgba(139,92,246,0.25); margin:auto;">
+      <!-- Header -->
+      <div
+        style="background:#13132a; padding:0.55rem 1.1rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(139,92,246,0.3);">
+        <span style="color:#a78bfa; font-weight:700; font-family:'Inter',sans-serif; font-size:0.95rem;">✨ Claude Code
+          &nbsp;<span style="color:#64748b; font-weight:400; font-size:0.8rem;">· /Storage</span></span>
+        <button id="claude-term-close"
+          style="background:transparent; color:#64748b; border:none; font-size:1.6rem; cursor:pointer; line-height:1; transition:color .2s;"
+          onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">&times;</button>
+      </div>
+      <!-- Output -->
+      <div id="claude-output"
+        style="flex-grow:1; padding:14px 16px; color:#e2e8f0; overflow-y:auto; font-size:13.5px; white-space:pre-wrap; word-break:break-all; line-height:1.6;">
+      </div>
+      <!-- Input bar -->
+      <div
+        style="display:flex; padding:10px 14px; background:#0a0a18; border-top:1px solid rgba(139,92,246,0.3); align-items:center; gap:10px;">
+        <span style="color:#a78bfa; font-weight:700; font-size:14px; white-space:nowrap; user-select:none;">you ›</span>
+        <input type="text" id="claude-input" autocomplete="off" spellcheck="false"
+          placeholder="Type your message and press Enter…"
+          style="flex-grow:1; background:transparent; border:none; color:#e2e8f0; font-family:'Courier New',Courier,monospace; font-size:13.5px; outline:none;">
+        <button id="claude-send-btn"
+          style="background:rgba(139,92,246,0.18); border:1px solid rgba(139,92,246,0.5); color:#a78bfa; border-radius:7px; padding:5px 14px; cursor:pointer; font-size:13px; font-weight:600; transition:all .2s;"
+          onmouseover="this.style.background='rgba(139,92,246,0.35)'"
+          onmouseout="this.style.background='rgba(139,92,246,0.18)'">Send</button>
       </div>
     </div>
   </div>
@@ -741,18 +1249,18 @@
     const btnConfirm = document.getElementById('btn-confirm');
     const btnCancel = document.getElementById('btn-cancel');
 
-    let pendingAction = null;
+    let pendingSystem = null;
 
     function openModal(label, id) {
       modalTitle.textContent = label;
       modalMsg.textContent = `Are you sure you want to execute: "${label}"?`;
-      pendingAction = id;
+      pendingSystem = id;
       modalBg.classList.add('open');
     }
 
     btnCancel.addEventListener('click', () => {
       modalBg.classList.remove('open');
-      pendingAction = null;
+      pendingSystem = null;
     });
     modalBg.addEventListener('click', e => {
       if (e.target === modalBg) btnCancel.click();
@@ -760,17 +1268,17 @@
 
     btnConfirm.addEventListener('click', () => {
       modalBg.classList.remove('open');
-      if (pendingAction) executeAction(pendingAction);
-      pendingAction = null;
+      if (pendingSystem) executeSystem(pendingSystem);
+      pendingSystem = null;
     });
 
     // ---- Execute ----
-    async function executeAction(id) {
-      const btn = document.querySelector(`.action-btn[data-id="${id}"]`);
+    async function executeSystem(id) {
+      const btn = document.querySelector(`.system-btn[data-id="${id}"]`);
       if (btn) btn.classList.add('loading');
       appendLog(`Executing: ${id}...`, 'info');
       try {
-        const res = await fetch(`/api/action/${id}`, { method: 'POST' });
+        const res = await fetch(`/api/system/${id}`, { method: 'POST' });
         const data = await res.json();
         appendLog(data.output, data.ok ? 'ok' : 'err');
       } catch (e) {
@@ -785,13 +1293,79 @@
     }
 
     // ---- Button click handler ----
-    document.getElementById('actions').addEventListener('click', e => {
-      const btn = e.target.closest('.action-btn');
+    document.getElementById('system').addEventListener('click', e => {
+      const btn = e.target.closest('.system-btn');
       if (!btn) return;
       const id = btn.dataset.id;
       const label = btn.dataset.label;
       const confirm = btn.dataset.confirm === 'true';
-      confirm ? openModal(label, id) : executeAction(id);
+
+      if (id === 'storage') {
+        fmModalBg.classList.add('open');
+        loadFmFiles();
+        // Run setup in background to ensure samba/loopback is created
+        fetch('/api/system/storage', { method: 'POST' }).catch(() => { });
+        return;
+      }
+
+      if (id === 'runcode') {
+        ideModalBg.style.display = 'flex';
+        ideLoadSidebar('');
+        return;
+      }
+
+      if (id === 'terminal') {
+        termModalBg.style.display = 'flex';
+        setTimeout(() => termInput.focus(), 100);
+        return;
+      }
+
+      confirm ? openModal(label, id) : executeSystem(id);
+    });
+
+    // ---- IA toggle ----
+    const iaCard = document.getElementById('ia-card');
+    const iaCheck = document.getElementById('ia-check');
+    const iaToggle = document.getElementById('ia-toggle');
+    const iaStatus = document.getElementById('ia-status');
+    const iaOpenBtn = document.getElementById('ia-open-btn');
+
+    function updateIaUI(active) {
+      iaCheck.checked = active;
+      iaCard.classList.toggle('active', active);
+      iaStatus.textContent = active ? 'Online — Gateway is running' : 'Offline — Gateway is stopped';
+      iaStatus.className = 'share-status' + (active ? ' on' : '');
+      // Show/hide the Open button with animation
+      iaOpenBtn.style.display = active ? 'inline-flex' : 'none';
+      // Trigger CSS transition on next frame
+      requestAnimationFrame(() => iaOpenBtn.classList.toggle('visible', active));
+    }
+
+    async function checkIaStatus() {
+      try {
+        const d = await fetch('/api/ia/status').then(r => r.json());
+        updateIaUI(d.active);
+      } catch (e) {
+        iaStatus.textContent = 'Unable to check status';
+      }
+    }
+    checkIaStatus();
+
+    iaCheck.addEventListener('change', async () => {
+      iaToggle.classList.add('loading');
+      const desired = iaCheck.checked;
+      appendLog(desired ? 'Starting 9Router...' : 'Stopping 9Router...', 'info');
+      try {
+        const res = await fetch('/api/ia/toggle', { method: 'POST' });
+        const data = await res.json();
+        updateIaUI(data.active);
+        appendLog(data.output, data.ok ? 'ok' : 'err');
+      } catch (e) {
+        iaCheck.checked = !desired;
+        appendLog('Error toggling 9Router.', 'err');
+      } finally {
+        iaToggle.classList.remove('loading');
+      }
     });
 
     // ---- Share Wi-Fi toggle ----
@@ -889,7 +1463,7 @@
         <path d="M14 19L14 8" stroke="${f3}" stroke-width="3" stroke-linecap="round"/>
         <path d="M19 19L19 4" stroke="${f4}" stroke-width="3" stroke-linecap="round"/>
       </svg>`;
-      
+
       return `<span style="display:inline-flex; align-items:center;">${svg} ${label} (${signal}%)</span>`;
     }
 
@@ -1030,7 +1604,526 @@
 
     refreshWifiCurrent();
     scanWifi();
+
+    // ---- File Manager Logic ----
+    const fmModalBg = document.getElementById('fm-modal-bg');
+    const fmClose = document.getElementById('fm-close');
+    const fmList = document.getElementById('fm-list');
+    const fmFileInput = document.getElementById('fm-file-input');
+    const fmBtnUpload = document.getElementById('fm-btn-upload');
+    const fmBtnBack = document.getElementById('fm-btn-back');
+    const fmBtnMkdir = document.getElementById('fm-btn-mkdir');
+    const fmPathText = document.getElementById('fm-path');
+    const fmQuotaText = document.getElementById('fm-quota-text');
+    const fmQuotaBar = document.getElementById('fm-quota-bar');
+
+    let currentStoragePath = '';
+    const TOTAL_QUOTA = 20 * 1024 * 1024 * 1024; // 20 GB
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function loadFmFiles() {
+      fmList.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--muted); font-size:0.9rem;">Loading...</div>';
+      fmPathText.textContent = '/' + currentStoragePath;
+      fmBtnBack.disabled = currentStoragePath === '';
+
+      try {
+        const d = await fetch('/api/storage/files?path=' + encodeURIComponent(currentStoragePath)).then(r => r.json());
+        if (!d.ok) throw new Error(d.output || 'Error');
+
+        // Update Quota
+        const used = d.used_bytes || 0;
+        fmQuotaText.textContent = `${formatBytes(used)} / 20 GB Usado`;
+        fmQuotaBar.style.width = Math.min(100, (used / TOTAL_QUOTA) * 100) + '%';
+
+        fmList.innerHTML = '';
+        if (d.files.length === 0) {
+          fmList.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--muted); font-size:0.9rem;">Pasta vazia.</div>';
+          return;
+        }
+
+        d.files.forEach(f => {
+          const div = document.createElement('div');
+          div.className = 'fm-item';
+          const icon = f.is_dir ? '📁' : '📄';
+
+          let clickHandler = '';
+          if (f.is_dir) {
+            clickHandler = `onclick="enterFolder('${f.name}')"`;
+          }
+
+          div.innerHTML = `
+            <div class="fm-icon" ${clickHandler}>${icon}</div>
+            <div class="fm-name" ${clickHandler}>${f.name}</div>
+            <div class="fm-size">${f.is_dir ? '--' : formatBytes(f.size)}</div>
+            <div class="fm-actions">
+              ${f.is_dir ? '' : `<button onclick="downloadFile('${f.name}')" title="Download">⬇️</button>`}
+              <button class="fm-del" onclick="deleteFile('${f.name}')" title="Excluir">🗑️</button>
+            </div>
+          `;
+          fmList.appendChild(div);
+        });
+      } catch (e) {
+        fmList.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--err); font-size:0.9rem;">' + e.message + '</div>';
+      }
+    }
+
+    window.enterFolder = function (name) {
+      currentStoragePath = currentStoragePath ? currentStoragePath + '/' + name : name;
+      loadFmFiles();
+    };
+
+    fmBtnBack.addEventListener('click', () => {
+      const parts = currentStoragePath.split('/');
+      parts.pop();
+      currentStoragePath = parts.join('/');
+      loadFmFiles();
+    });
+
+    fmBtnMkdir.addEventListener('click', async () => {
+      const name = prompt('Nome da nova pasta:');
+      if (!name) return;
+      try {
+        const res = await fetch('/api/storage/mkdir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: currentStoragePath, name })
+        });
+        const d = await res.json();
+        if (d.ok) loadFmFiles();
+        else alert('Erro: ' + d.output);
+      } catch (e) { alert('Erro ao criar pasta'); }
+    });
+
+    function getFullPath(name) {
+      return currentStoragePath ? currentStoragePath + '/' + name : name;
+    }
+
+    window.downloadFile = function (name) {
+      window.open('/api/storage/download/' + encodeURIComponent(getFullPath(name)), '_blank');
+    };
+
+    window.deleteFile = async function (name) {
+      if (!confirm(`Excluir permanentemente: ${name}?`)) return;
+      try {
+        await fetch('/api/storage/delete/' + encodeURIComponent(getFullPath(name)), { method: 'POST' });
+        loadFmFiles();
+      } catch (e) {
+        alert('Erro ao excluir');
+      }
+    };
+
+    fmBtnUpload.addEventListener('click', async () => {
+      const file = fmFileInput.files[0];
+      if (!file) return alert('Selecione um arquivo primeiro!');
+      fmBtnUpload.disabled = true;
+      fmBtnUpload.textContent = 'Enviando...';
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('path', currentStoragePath);
+      try {
+        const res = await fetch('/api/storage/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.ok) {
+          fmFileInput.value = '';
+          loadFmFiles();
+        } else {
+          alert('Falha no upload: ' + data.output);
+        }
+      } catch (e) {
+        alert('Erro de envio');
+      } finally {
+        fmBtnUpload.disabled = false;
+        fmBtnUpload.textContent = 'Upload';
+      }
+    });
+
+    fmClose.addEventListener('click', () => {
+      fmModalBg.classList.remove('open');
+      currentStoragePath = ''; // Reset on close
+    });
+    fmModalBg.addEventListener('click', e => { if (e.target === fmModalBg) fmClose.click(); });
+
+    // ---- IDE Logic ----
+    const ideModalBg = document.getElementById('ide-modal-bg');
+    const ideBtnClose = document.getElementById('ide-btn-close');
+    const ideBtnSave = document.getElementById('ide-btn-save');
+    const ideBtnRun = document.getElementById('ide-btn-run');
+    const ideEditor = document.getElementById('ide-editor');
+    const ideOutput = document.getElementById('ide-output');
+    const ideSidebarList = document.getElementById('ide-sidebar-list');
+    const ideCurrentFile = document.getElementById('ide-current-file');
+
+    let ideOpenedFile = null;
+
+    async function ideLoadSidebar(path = '') {
+      ideSidebarList.innerHTML = '<div style="padding:10px; color:#858585;">Loading...</div>';
+      try {
+        const d = await fetch('/api/storage/files?path=' + encodeURIComponent(path)).then(r => r.json());
+        if (!d.ok) throw new Error();
+        ideSidebarList.innerHTML = '';
+
+        if (path !== '') {
+          const upDiv = document.createElement('div');
+          upDiv.style.cssText = 'padding:4px 15px; cursor:pointer; font-size:13px; color:#cccccc;';
+          upDiv.innerHTML = '📁 ..';
+          upDiv.onclick = () => {
+            const parts = path.split('/');
+            parts.pop();
+            ideLoadSidebar(parts.join('/'));
+          };
+          upDiv.onmouseover = () => upDiv.style.background = '#37373d';
+          upDiv.onmouseout = () => upDiv.style.background = 'transparent';
+          ideSidebarList.appendChild(upDiv);
+        }
+
+        d.files.forEach(f => {
+          if (!f.is_dir && !f.name.endsWith('.py')) return;
+
+          const div = document.createElement('div');
+          div.style.cssText = 'padding:4px 15px; cursor:pointer; font-size:13px; color:#cccccc; display:flex; gap:8px;';
+          div.innerHTML = `<span>${f.is_dir ? '📁' : '🐍'}</span> <span>${f.name}</span>`;
+          div.onmouseover = () => div.style.background = '#37373d';
+          div.onmouseout = () => div.style.background = 'transparent';
+
+          const fullPath = path ? path + '/' + f.name : f.name;
+
+          div.onclick = () => {
+            if (f.is_dir) {
+              ideLoadSidebar(fullPath);
+            } else {
+              ideOpenFile(fullPath);
+            }
+          };
+          ideSidebarList.appendChild(div);
+        });
+      } catch (e) {
+        if (path !== '') {
+          ideLoadSidebar(''); // fallback to root
+        } else {
+          ideSidebarList.innerHTML = '<div style="padding:10px; color:#f48771;">Error loading files</div>';
+        }
+      }
+    }
+
+    async function ideOpenFile(filePath) {
+      ideOpenedFile = filePath;
+      ideCurrentFile.textContent = filePath;
+      ideEditor.value = 'Loading...';
+      ideOutput.textContent = '';
+      try {
+        const res = await fetch('/api/runcode/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath })
+        });
+        const d = await res.json();
+        if (d.ok) {
+          ideEditor.value = d.content;
+        } else {
+          alert('Error: ' + d.output);
+          ideOpenedFile = null;
+          ideCurrentFile.textContent = 'No file selected';
+          ideEditor.value = '';
+          ideLoadSidebar('');
+        }
+      } catch (e) {
+        ideEditor.value = 'Error loading file';
+      }
+    }
+
+    ideBtnSave.onclick = async () => {
+      if (!ideOpenedFile) return alert('No file opened');
+      ideBtnSave.textContent = 'Saving...';
+      try {
+        const res = await fetch('/api/runcode/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: ideOpenedFile, content: ideEditor.value })
+        });
+        const d = await res.json();
+        if (!d.ok) {
+          alert('Error: ' + d.output);
+          if (d.output.includes('No such file or directory') || d.output.includes('File not found')) {
+            ideOpenedFile = null;
+            ideCurrentFile.textContent = 'No file selected';
+            ideEditor.value = '';
+            ideLoadSidebar('');
+          }
+          ideBtnSave.textContent = '💾 Save';
+          return false;
+        }
+        ideBtnSave.textContent = '💾 Save';
+        return true;
+      } catch (e) {
+        alert('Error saving');
+        ideBtnSave.textContent = '💾 Save';
+        return false;
+      }
+    };
+
+    ideBtnRun.onclick = async () => {
+      if (!ideOpenedFile) return alert('No file opened');
+      const saved = await ideBtnSave.onclick();
+      if (saved === false) return; // Stop if save failed
+
+      ideOutput.textContent = 'Running...\\n';
+      ideBtnRun.disabled = true;
+      ideBtnRun.style.opacity = '0.5';
+
+      try {
+        const res = await fetch('/api/runcode/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: ideOpenedFile })
+        });
+        const d = await res.json();
+        ideOutput.textContent += d.output || '\\n[No Output]';
+      } catch (e) {
+        ideOutput.textContent += 'Execution error';
+      }
+
+      ideBtnRun.disabled = false;
+      ideBtnRun.style.opacity = '1';
+    };
+
+    ideBtnClose.onclick = () => {
+      ideModalBg.style.display = 'none';
+    };
+
+    // ---- Terminal Logic ----
+    const termModalBg = document.getElementById('term-modal-bg');
+    const termBtnClose = document.getElementById('term-btn-close');
+    const termOutput = document.getElementById('term-output');
+    const termInput = document.getElementById('term-input');
+    const termPrompt = document.getElementById('term-prompt');
+
+    let termCwd = '/opt/PiDongle';
+    let termHistory = [];
+    let termHistoryIdx = -1;
+
+    function updateTermPrompt(cwd) {
+      termCwd = cwd;
+      termPrompt.textContent = `root@pidongle:${cwd}#`;
+    }
+
+    function termPrint(text, isCommand = false) {
+      if (isCommand) {
+        const cmdLine = document.createElement('div');
+        cmdLine.style.marginTop = '5px';
+        cmdLine.innerHTML = `<span style="color:#0ff; font-weight:bold;">root@pidongle:${termCwd}#</span> <span style="color:#fff;">${text}</span>`;
+        termOutput.appendChild(cmdLine);
+      } else if (text) {
+        const resLine = document.createElement('div');
+        resLine.textContent = text;
+        termOutput.appendChild(resLine);
+      }
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    termInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        const cmd = termInput.value.trim();
+        termInput.value = '';
+
+        if (cmd) {
+          termHistory.push(cmd);
+          termHistoryIdx = termHistory.length;
+        }
+
+        if (cmd === 'clear') {
+          termOutput.innerHTML = '';
+          return;
+        }
+
+        termPrint(cmd, true);
+        if (!cmd) return;
+
+        termInput.disabled = true;
+        try {
+          const res = await fetch('/api/terminal/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cmd, cwd: termCwd })
+          });
+          const d = await res.json();
+          if (d.output) termPrint(d.output);
+          if (d.cwd) updateTermPrompt(d.cwd);
+        } catch (err) {
+          termPrint("Error executing command.\\n");
+        } finally {
+          termInput.disabled = false;
+          termInput.focus();
+        }
+      } else if (e.key === 'ArrowUp') {
+        if (termHistoryIdx > 0) {
+          termHistoryIdx--;
+          termInput.value = termHistory[termHistoryIdx];
+        }
+        e.preventDefault(); // Prevent cursor jumping
+      } else if (e.key === 'ArrowDown') {
+        if (termHistoryIdx < termHistory.length - 1) {
+          termHistoryIdx++;
+          termInput.value = termHistory[termHistoryIdx];
+        } else {
+          termHistoryIdx = termHistory.length;
+          termInput.value = '';
+        }
+        e.preventDefault();
+      }
+    });
+
+    termBtnClose.onclick = () => termModalBg.style.display = 'none';
+    termModalBg.onclick = (e) => { if (e.target === termModalBg) termBtnClose.click(); };
+
+
+    // ---- Claude Code Terminal ----
+    const claudeModalBg = document.getElementById('claude-modal-bg');
+    const claudeTermClose = document.getElementById('claude-term-close');
+    const claudeOutput = document.getElementById('claude-output');
+    const claudeInputEl = document.getElementById('claude-input');
+    const claudeSendBtn = document.getElementById('claude-send-btn');
+    const claudeCheck = document.getElementById('claude-check');
+    const claudeToggleEl = document.getElementById('claude-toggle');
+    const claudeCardStatus = document.getElementById('claude-card-status');
+    const claudeCard = document.getElementById('claude-card');
+
+    let claudeEvtSrc = null;
+
+    function updateClaudeUI(active) {
+      claudeCheck.checked = active;
+      claudeCard.classList.toggle('active', active);
+      claudeCardStatus.textContent = active ? 'Online — Claude is running' : 'Offline — Ready to start';
+      claudeCardStatus.className = 'share-status' + (active ? ' on' : '');
+    }
+
+    // Strip ANSI/VT100 escape sequences so output is readable as plain text
+    function stripAnsi(str) {
+      return str
+        .replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '') // CSI sequences: ESC [ ... letter
+        .replace(/\x1b[()][AB012]/g, '')          // Character-set sequences
+        .replace(/\x1b[ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`]/g, '') // 2-char ESC
+        .replace(/\x1b\][^\x07]*\x07/g, '')       // OSC sequences: ESC ] ... BEL
+        .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, ''); // misc ctrl chars
+    }
+
+    function claudePrint(text) {
+      const clean = stripAnsi(text);
+      // Handle \r (carriage return) — overwrite current line instead of appending
+      const lines = claudeOutput.textContent.split('\n');
+      const parts = clean.split('\r');
+      let result = parts[0];
+      for (let i = 1; i < parts.length; i++) {
+        // \r resets to start of the current logical line
+        if (parts[i].length > 0) {
+          result = result.replace(/[^\n]*$/, parts[i]);
+        }
+      }
+      // Split result back into new-lines and merge with existing content
+      const resultLines = result.split('\n');
+      for (let i = 0; i < resultLines.length; i++) {
+        if (i === 0) {
+          lines[lines.length - 1] = (lines[lines.length - 1] || '') + resultLines[0];
+        } else {
+          lines.push(resultLines[i]);
+        }
+      }
+      claudeOutput.textContent = lines.join('\n');
+      claudeOutput.scrollTop = claudeOutput.scrollHeight;
+    }
+
+    function claudeOpenSSE() {
+      if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+      claudeEvtSrc = new EventSource('/api/claude/output');
+      claudeEvtSrc.onmessage = (e) => {
+        const parsed = JSON.parse(e.data);
+        if (parsed && parsed.__done__) {
+          claudeEvtSrc.close(); claudeEvtSrc = null;
+          updateClaudeUI(false);
+          claudePrint('\n\n[Claude session ended]\n');
+          return;
+        }
+        claudePrint(parsed);
+      };
+      claudeEvtSrc.onerror = () => {
+        if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+      };
+    }
+
+    async function startClaude() {
+      claudeToggleEl.classList.add('loading');
+      try {
+        const res = await fetch('/api/claude/start', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          updateClaudeUI(true);
+          claudeOutput.textContent = '';
+          claudeInputEl.value = '';
+          claudeModalBg.style.cssText = 'display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:210; align-items:center; justify-content:center;';
+          claudeOpenSSE();
+          setTimeout(() => claudeInputEl.focus(), 150);
+        } else {
+          appendLog('Erro ao iniciar Claude: ' + (data.output || 'Verifique se o claude está instalado.'), 'err');
+          claudeCheck.checked = false;
+        }
+      } catch (e) {
+        appendLog('Erro ao iniciar Claude.', 'err');
+        claudeCheck.checked = false;
+      } finally {
+        claudeToggleEl.classList.remove('loading');
+      }
+    }
+
+    async function stopClaude() {
+      if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+      claudeToggleEl.classList.add('loading');
+      try {
+        await fetch('/api/claude/stop', { method: 'POST' });
+        updateClaudeUI(false);
+        claudeModalBg.style.display = 'none';
+      } finally {
+        claudeToggleEl.classList.remove('loading');
+      }
+    }
+
+    claudeCheck.addEventListener('change', () => {
+      claudeCheck.checked ? startClaude() : stopClaude();
+    });
+
+    async function sendClaudeInput() {
+      const text = claudeInputEl.value;
+      if (!text) return;
+      claudeInputEl.value = '';
+      try {
+        await fetch('/api/claude/input', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text + '\n' })
+        });
+      } catch (e) {
+        claudePrint('\n[Erro ao enviar mensagem]\n');
+      }
+    }
+
+    claudeInputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); sendClaudeInput(); }
+    });
+    claudeSendBtn.addEventListener('click', sendClaudeInput);
+
+    claudeTermClose.addEventListener('click', stopClaude);
+    claudeModalBg.addEventListener('click', (e) => { if (e.target === claudeModalBg) stopClaude(); });
+
+    // Check initial claude status on page load
+    fetch('/api/claude/status').then(r => r.json()).then(d => {
+      if (d.active) { updateClaudeUI(true); claudeOpenSSE(); }
+    }).catch(() => { });
+
   </script>
+
 </body>
 
 </html>

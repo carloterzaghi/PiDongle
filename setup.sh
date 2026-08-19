@@ -8,7 +8,7 @@ echo "=== PiDongle setup ==="
 
 # --- Dependências ---
 apt-get update -y
-apt-get install -y python3 python3-pip python3-venv dnsmasq git tcpdump iptables
+apt-get install -y python3 python3-pip python3-venv dnsmasq git tcpdump iptables samba
 
 # --- Detectar caminho de boot (Bookworm/Trixie usa /boot/firmware) ---
 if [ -d /boot/firmware ]; then
@@ -164,7 +164,28 @@ chmod +x "$APP_DIR/scripts/"*.sh 2>/dev/null || true
 cd "$APP_DIR/app"
 python3 -m venv venv
 venv/bin/pip install --upgrade pip
-venv/bin/pip install flask psutil
+venv/bin/pip install flask psutil ptyprocess
+
+# --- Install Node.js, OmniRoute & PM2 ---
+echo "[setup] Installing Node.js v22..."
+curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+bash nodesource_setup.sh
+apt-get install -y nodejs
+rm -f nodesource_setup.sh
+
+echo "[setup] Creating temporary 2GB swap for npm install..."
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+echo "[setup] Installing 9Router, PM2, and Claude Code (this should be fast!)..."
+npm install -g 9router pm2 @anthropic-ai/claude-code
+
+echo "[setup] Removing temporary swap..."
+swapoff /swapfile
+rm -f /swapfile
+
 
 # --- Systemd service ---
 cat > /etc/systemd/system/PiDongle.service <<EOF
