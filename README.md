@@ -55,8 +55,8 @@ PiDongle/
 ├── scripts/                # Scripts executed by actions
 │   ├── reboot.sh
 │   ├── shutdown.sh
+│   ├── storage.sh          # 20GB Samba storage setup
 │   ├── update.sh
-│   ├── temp.sh
 │   ├── blink.sh
 │   └── custom.sh           # ← add your scripts here
 ```
