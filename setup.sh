@@ -95,6 +95,12 @@ done
 
 # Levantar interface (IP gerenciado por systemd-networkd)
 ip link set usb0 up
+
+# Restaurar regras iptables salvas (se sharing estava ativo antes do reboot)
+if [ -f /etc/iptables.pidongle.rules ]; then
+    iptables-restore < /etc/iptables.pidongle.rules
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+fi
 GADGET
 chmod +x /usr/local/bin/usb-gadget.sh
 echo "[gadget] CDC NCM script created"
