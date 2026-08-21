@@ -863,6 +863,109 @@
       color: var(--text);
       background: var(--bg);
     }
+
+    /* ---- Claude Code improvements ---- */
+    #claude-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform: scale(0.85);
+      pointer-events: none;
+    }
+
+    #claude-open-btn.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    #claude-open-btn:hover {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--accent);
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .claude-thinking {
+      display: inline-flex;
+      gap: 4px;
+      padding: 8px 0;
+    }
+
+    .claude-thinking span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: thinking-bounce 1.4s ease-in-out infinite;
+    }
+
+    .claude-thinking span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .claude-thinking span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes thinking-bounce {
+
+      0%,
+      80%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    #claude-stop-btn {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+      border-radius: 7px;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+
+    #claude-stop-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+    }
+
+    .claude-reconnect-msg {
+      color: var(--warn);
+      font-style: italic;
+      opacity: 0.8;
+      padding: 2px 0;
+    }
+
+    .claude-session-end {
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      margin: 10px 0;
+    }
   </style>
 </head>
 
@@ -951,12 +1054,13 @@
       <div class="share-info">
         <span class="share-icon" style="font-size: 2.2rem;">✨</span>
         <div>
-          <div class="share-label">Claude Code</div>
+          <div class="share-label">Claude Code (in test mode)</div>
           <div class="share-status" id="claude-card-status">Offline — Ready to start</div>
           <div style="font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem;">Runs inside /Storage</div>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:0.75rem; flex-shrink:0;">
+        <button id="claude-open-btn" title="Open Claude terminal">Open ↗</button>
         <label class="toggle" id="claude-toggle">
           <input type="checkbox" id="claude-check">
           <span class="toggle-slider"></span>
@@ -1191,9 +1295,13 @@
         style="background:#13132a; padding:0.55rem 1.1rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(139,92,246,0.3);">
         <span style="color:#a78bfa; font-weight:700; font-family:'Inter',sans-serif; font-size:0.95rem;">✨ Claude Code
           &nbsp;<span style="color:#64748b; font-weight:400; font-size:0.8rem;">· /Storage</span></span>
-        <button id="claude-term-close"
-          style="background:transparent; color:#64748b; border:none; font-size:1.6rem; cursor:pointer; line-height:1; transition:color .2s;"
-          onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">&times;</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button id="claude-stop-btn" title="Stop Claude process">⏹ Stop</button>
+          <button id="claude-term-close"
+            style="background:transparent; color:#64748b; border:none; font-size:1.6rem; cursor:pointer; line-height:1; transition:color .2s;"
+            onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'"
+            title="Minimize (Claude keeps running)">&times;</button>
+        </div>
       </div>
       <!-- Output -->
       <div id="claude-output"
@@ -1984,6 +2092,7 @@
     // ---- Claude Code Terminal ----
     const claudeModalBg = document.getElementById('claude-modal-bg');
     const claudeTermClose = document.getElementById('claude-term-close');
+    const claudeStopBtn = document.getElementById('claude-stop-btn');
     const claudeOutput = document.getElementById('claude-output');
     const claudeInputEl = document.getElementById('claude-input');
     const claudeSendBtn = document.getElementById('claude-send-btn');
@@ -1991,67 +2100,130 @@
     const claudeToggleEl = document.getElementById('claude-toggle');
     const claudeCardStatus = document.getElementById('claude-card-status');
     const claudeCard = document.getElementById('claude-card');
+    const claudeOpenBtn = document.getElementById('claude-open-btn');
 
     let claudeEvtSrc = null;
+    let claudeHistory = [];
+    let claudeHistoryIdx = -1;
+    let claudeThinkingEl = null;
+    let claudeSseRetries = 0;
+    const CLAUDE_SSE_MAX_RETRIES = 3;
+    let _claudeTextBuf = '';
 
     function updateClaudeUI(active) {
       claudeCheck.checked = active;
       claudeCard.classList.toggle('active', active);
       claudeCardStatus.textContent = active ? 'Online — Claude is running' : 'Offline — Ready to start';
       claudeCardStatus.className = 'share-status' + (active ? ' on' : '');
+      // Show/hide Open button with animation
+      requestAnimationFrame(() => claudeOpenBtn.classList.toggle('visible', active));
     }
 
     // Strip ANSI/VT100 escape sequences so output is readable as plain text
     function stripAnsi(str) {
       return str
-        .replace(/\x1b\[[0-9;?]*[A-Za-z]/g, '') // CSI sequences: ESC [ ... letter
-        .replace(/\x1b[()][AB012]/g, '')          // Character-set sequences
-        .replace(/\x1b[ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`]/g, '') // 2-char ESC
-        .replace(/\x1b\][^\x07]*\x07/g, '')       // OSC sequences: ESC ] ... BEL
+        .replace(/\x1b\[[\x20-\x3f]*[\x40-\x7e]/g, '')  // CSI sequences (ECMA-48 compliant, covers >, ?, = etc.)
+        .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '') // OSC sequences: ESC ] ... BEL or ST
+        .replace(/\x1bP[^\x1b]*\x1b\\/g, '')              // DCS sequences
+        .replace(/\x1b[()][AB012]/g, '')                    // Character-set sequences
+        .replace(/\x1b[\x20-\x7e]/g, '')                   // Remaining 2-char ESC sequences
         .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, ''); // misc ctrl chars
     }
 
+    function removeThinking() {
+      if (claudeThinkingEl && claudeThinkingEl.parentNode) {
+        claudeThinkingEl.remove();
+      }
+      claudeThinkingEl = null;
+    }
+
+    function showThinking() {
+      removeThinking();
+      claudeThinkingEl = document.createElement('div');
+      claudeThinkingEl.className = 'claude-thinking';
+      claudeThinkingEl.innerHTML = '<span></span><span></span><span></span>';
+      claudeOutput.appendChild(claudeThinkingEl);
+      claudeOutput.scrollTop = claudeOutput.scrollHeight;
+    }
+
     function claudePrint(text) {
-      const clean = stripAnsi(text);
-      // Handle \r (carriage return) — overwrite current line instead of appending
-      const lines = claudeOutput.textContent.split('\n');
-      const parts = clean.split('\r');
-      let result = parts[0];
-      for (let i = 1; i < parts.length; i++) {
-        // \r resets to start of the current logical line
-        if (parts[i].length > 0) {
-          result = result.replace(/[^\n]*$/, parts[i]);
-        }
+      removeThinking();
+
+      let clean = stripAnsi(text);
+      // Normalize CRLF to LF
+      clean = clean.replace(/\r\n/g, '\n');
+
+      _claudeTextBuf += clean;
+
+      // Process \r (carriage return) by keeping only the content after the last \r on each line
+      let lines = _claudeTextBuf.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const parts = lines[i].split('\r');
+        lines[i] = parts[parts.length - 1];
       }
-      // Split result back into new-lines and merge with existing content
-      const resultLines = result.split('\n');
-      for (let i = 0; i < resultLines.length; i++) {
-        if (i === 0) {
-          lines[lines.length - 1] = (lines[lines.length - 1] || '') + resultLines[0];
-        } else {
-          lines.push(resultLines[i]);
-        }
+
+      // Cap buffer at 500 lines to prevent infinite growth
+      if (lines.length > 500) {
+        lines = lines.slice(lines.length - 500);
       }
-      claudeOutput.textContent = lines.join('\n');
+
+      _claudeTextBuf = lines.join('\n');
+      claudeOutput.textContent = _claudeTextBuf;
       claudeOutput.scrollTop = claudeOutput.scrollHeight;
     }
 
     function claudeOpenSSE() {
       if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+      claudeSseRetries = 0;
+      _claudeConnectSSE();
+    }
+
+    function _claudeConnectSSE() {
+      if (claudeEvtSrc) { claudeEvtSrc.close(); }
       claudeEvtSrc = new EventSource('/api/claude/output');
+      claudeEvtSrc.onopen = () => { claudeSseRetries = 0; };
       claudeEvtSrc.onmessage = (e) => {
         const parsed = JSON.parse(e.data);
         if (parsed && parsed.__done__) {
           claudeEvtSrc.close(); claudeEvtSrc = null;
           updateClaudeUI(false);
-          claudePrint('\n\n[Claude session ended]\n');
+          removeThinking();
+          const endDiv = document.createElement('div');
+          endDiv.className = 'claude-session-end';
+          endDiv.textContent = '— session ended —';
+          claudeOutput.appendChild(endDiv);
+          claudeOutput.scrollTop = claudeOutput.scrollHeight;
           return;
         }
         claudePrint(parsed);
       };
       claudeEvtSrc.onerror = () => {
         if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+        claudeSseRetries++;
+        if (claudeSseRetries <= CLAUDE_SSE_MAX_RETRIES) {
+          const reconnDiv = document.createElement('div');
+          reconnDiv.className = 'claude-reconnect-msg';
+          reconnDiv.textContent = '[Reconnecting... attempt ' + claudeSseRetries + '/' + CLAUDE_SSE_MAX_RETRIES + ']';
+          claudeOutput.appendChild(reconnDiv);
+          claudeOutput.scrollTop = claudeOutput.scrollHeight;
+          setTimeout(_claudeConnectSSE, 2000 * claudeSseRetries);
+        } else {
+          const failDiv = document.createElement('div');
+          failDiv.className = 'claude-reconnect-msg';
+          failDiv.textContent = '[Connection lost. Toggle Claude off/on to reconnect.]';
+          claudeOutput.appendChild(failDiv);
+          claudeOutput.scrollTop = claudeOutput.scrollHeight;
+        }
       };
+    }
+
+    function openClaudeModal() {
+      claudeModalBg.style.cssText = 'display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:210; align-items:center; justify-content:center;';
+      setTimeout(() => claudeInputEl.focus(), 150);
+    }
+
+    function hideClaudeModal() {
+      claudeModalBg.style.display = 'none';
     }
 
     async function startClaude() {
@@ -2062,10 +2234,10 @@
         if (data.ok) {
           updateClaudeUI(true);
           claudeOutput.textContent = '';
+          _claudeTextBuf = '';
           claudeInputEl.value = '';
-          claudeModalBg.style.cssText = 'display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:210; align-items:center; justify-content:center;';
+          openClaudeModal();
           claudeOpenSSE();
-          setTimeout(() => claudeInputEl.focus(), 150);
         } else {
           appendLog('Erro ao iniciar Claude: ' + (data.output || 'Verifique se o claude está instalado.'), 'err');
           claudeCheck.checked = false;
@@ -2080,11 +2252,12 @@
 
     async function stopClaude() {
       if (claudeEvtSrc) { claudeEvtSrc.close(); claudeEvtSrc = null; }
+      removeThinking();
       claudeToggleEl.classList.add('loading');
       try {
         await fetch('/api/claude/stop', { method: 'POST' });
         updateClaudeUI(false);
-        claudeModalBg.style.display = 'none';
+        hideClaudeModal();
       } finally {
         claudeToggleEl.classList.remove('loading');
       }
@@ -2094,10 +2267,21 @@
       claudeCheck.checked ? startClaude() : stopClaude();
     });
 
+    // Open button on the card — just shows the modal, doesn't restart
+    claudeOpenBtn.addEventListener('click', () => {
+      openClaudeModal();
+      // Reconnect SSE if not already connected
+      if (!claudeEvtSrc) claudeOpenSSE();
+    });
+
     async function sendClaudeInput() {
       const text = claudeInputEl.value;
       if (!text) return;
+      // Add to history
+      claudeHistory.push(text);
+      claudeHistoryIdx = claudeHistory.length;
       claudeInputEl.value = '';
+      showThinking();
       try {
         await fetch('/api/claude/input', {
           method: 'POST',
@@ -2105,17 +2289,63 @@
           body: JSON.stringify({ text: text + '\n' })
         });
       } catch (e) {
+        removeThinking();
         claudePrint('\n[Erro ao enviar mensagem]\n');
       }
     }
 
     claudeInputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); sendClaudeInput(); }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendClaudeInput();
+      } else if (e.key === 'ArrowUp') {
+        if (claudeHistoryIdx > 0) {
+          claudeHistoryIdx--;
+          claudeInputEl.value = claudeHistory[claudeHistoryIdx];
+        }
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown') {
+        if (claudeHistoryIdx < claudeHistory.length - 1) {
+          claudeHistoryIdx++;
+          claudeInputEl.value = claudeHistory[claudeHistoryIdx];
+        } else {
+          claudeHistoryIdx = claudeHistory.length;
+          claudeInputEl.value = '';
+        }
+        e.preventDefault();
+      } else if (e.key === 'c' && e.ctrlKey) {
+        // Ctrl+C → send SIGINT to PTY
+        e.preventDefault();
+        fetch('/api/claude/input', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: '\x03' })
+        }).catch(() => { });
+        removeThinking();
+        claudePrint('\n^C\n');
+      } else if (e.key === 'l' && e.ctrlKey) {
+        // Ctrl+L → clear output visually
+        e.preventDefault();
+        _claudeTextBuf = '';
+        claudeOutput.textContent = '';
+      }
     });
+
     claudeSendBtn.addEventListener('click', sendClaudeInput);
 
-    claudeTermClose.addEventListener('click', stopClaude);
-    claudeModalBg.addEventListener('click', (e) => { if (e.target === claudeModalBg) stopClaude(); });
+    // Close button = minimize (keep Claude running)
+    claudeTermClose.addEventListener('click', hideClaudeModal);
+    claudeModalBg.addEventListener('click', (e) => { if (e.target === claudeModalBg) hideClaudeModal(); });
+
+    // Stop button = actually kill Claude
+    claudeStopBtn.addEventListener('click', stopClaude);
+
+    // Escape key to minimize modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && claudeModalBg.style.display !== 'none' && claudeModalBg.style.display !== '') {
+        hideClaudeModal();
+      }
+    });
 
     // Check initial claude status on page load
     fetch('/api/claude/status').then(r => r.json()).then(d => {
